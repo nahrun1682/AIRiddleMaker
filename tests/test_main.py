@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -18,7 +18,7 @@ def _make_result(**kwargs) -> RiddleResult:
 
 
 def test_main_outputs_riddle(capsys):
-    with patch("riddle.main.RiddleService") as MockService:
+    with patch("riddle.main.RiddleService") as MockService, patch("builtins.input", return_value=""):
         MockService.return_value.generate_riddle.return_value = _make_result()
         main([])
 
@@ -28,15 +28,32 @@ def test_main_outputs_riddle(capsys):
 
 
 def test_main_pattern_option(capsys):
-    with patch("riddle.main.RiddleService") as MockService:
+    with patch("riddle.main.RiddleService") as MockService, patch("builtins.input", return_value=""):
         MockService.return_value.generate_riddle.return_value = _make_result(pattern="paradox")
         main(["--pattern", "paradox"])
 
-    MockService.return_value.generate_riddle.assert_called_once_with(pattern="paradox")
+    MockService.return_value.generate_riddle.assert_called_once_with(pattern="paradox", theme=None)
+
+
+def test_main_prompts_for_theme_when_not_given(capsys):
+    with patch("riddle.main.RiddleService") as MockService, patch("builtins.input", return_value="食べ物"):
+        MockService.return_value.generate_riddle.return_value = _make_result()
+        main([])
+
+    MockService.return_value.generate_riddle.assert_called_once_with(pattern=None, theme="食べ物")
+
+
+def test_main_theme_shown_in_output(capsys):
+    with patch("riddle.main.RiddleService") as MockService, patch("builtins.input", return_value="動物"):
+        MockService.return_value.generate_riddle.return_value = _make_result()
+        main([])
+
+    captured = capsys.readouterr()
+    assert "動物" in captured.out
 
 
 def test_main_error_exits(capsys):
-    with patch("riddle.main.RiddleService") as MockService:
+    with patch("riddle.main.RiddleService") as MockService, patch("builtins.input", return_value=""):
         MockService.return_value.generate_riddle.side_effect = RuntimeError("max_retries_exceeded")
         with pytest.raises(SystemExit) as exc_info:
             main([])

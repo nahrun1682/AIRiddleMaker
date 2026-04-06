@@ -9,13 +9,16 @@ def main(args: list[str] | None = None) -> None:
     parser.add_argument("--pattern", help="生成パターン (paradox/pun/char_extract 等)")
     parsed = parser.parse_args(args)
 
+    theme = input("テーマを入力してください（例: 食べ物、動物、季節）: ").strip() or None
+
     service = RiddleService()
     try:
-        result = service.generate_riddle(pattern=parsed.pattern)
+        result = service.generate_riddle(pattern=parsed.pattern, theme=theme)
     except RuntimeError as e:
         print(f"エラー: {e}", file=sys.stderr)
         sys.exit(1)
 
+    print(f"\nテーマ: {theme or '指定なし'}")
     print(f"問題: {result.question}")
     print(f"答え: {result.answer}")
     print(f"パターン: {result.pattern}")

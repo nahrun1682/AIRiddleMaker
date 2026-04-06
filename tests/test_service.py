@@ -61,6 +61,25 @@ def test_generate_riddle_sets_codex_home(service, tmp_path):
     assert ".codex-home" in env["CODEX_HOME"]
 
 
+def test_generate_riddle_includes_theme_in_prompt(service, tmp_path):
+    output = {
+        "question": "q", "answer": "a", "pattern": "pun",
+        "score": {"uniqueness": True, "single_paradox": True, "observation_based": True},
+        "attempts": 1,
+    }
+    output_file = tmp_path / "out.txt"
+    output_file.write_text(json.dumps(output))
+
+    with patch("riddle.service.subprocess.run", return_value=_mock_run(output)) as mock_run:
+        with patch("riddle.service.Path") as mock_path_cls:
+            mock_path_cls.return_value = output_file
+            service.generate_riddle(theme="食べ物")
+
+    cmd = mock_run.call_args[0][0]
+    prompt = cmd[-1]
+    assert "食べ物" in prompt
+
+
 def test_generate_riddle_max_retries(service, tmp_path):
     output = {"error": "max_retries_exceeded", "attempts": 5}
     output_file = tmp_path / "out.txt"

@@ -20,8 +20,10 @@ class RiddleService:
             if default_auth.exists():
                 auth_link.symlink_to(default_auth)
 
-    def generate_riddle(self, pattern: str | None = None) -> RiddleResult:
+    def generate_riddle(self, pattern: str | None = None, theme: str | None = None) -> RiddleResult:
         prompt = "なぞなぞを1問生成してください。"
+        if theme:
+            prompt += f"テーマ: {theme}。"
         if pattern:
             prompt += f"パターン: {pattern}"
 
