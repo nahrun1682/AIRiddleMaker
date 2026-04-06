@@ -166,6 +166,36 @@ def test_generate_riddle_includes_scorer_subagent_instruction(service, tmp_path)
     assert "score_riddle" in prompt
 
 
+def test_generate_riddle_passes_mcp_config_via_cli(service, tmp_path):
+    """codex exec must receive -c flag configuring the scorer MCP server."""
+    output = {
+        "question": "q", "answer": "a", "pattern": "pun",
+        "score": {
+            "uniqueness": True, "single_paradox": True,
+            "observation_based": True, "strict_score": 9.6,
+            "passed": True, "reason": "r", "strict_review": "s",
+        },
+        "attempts": 1,
+    }
+    output_file = tmp_path / "out.txt"
+    output_file.write_text(json.dumps(output))
+
+    with patch("riddle.service.subprocess.run", return_value=_mock_run(output)) as mock_run, \
+         patch("riddle.service._OUTPUT_FILE", output_file):
+        service.generate_riddle(scorer_port=19120, scorer_model="gpt-5.4")
+
+    cmd = mock_run.call_args[0][0]
+    # Find all -c arguments and their values
+    c_values = []
+    for i, arg in enumerate(cmd):
+        if arg == "-c" and i + 1 < len(cmd):
+            c_values.append(cmd[i + 1])
+
+    # Must have MCP server URL config
+    mcp_config = [v for v in c_values if "mcp_servers" in v and "19120" in v]
+    assert mcp_config, f"No MCP server config in -c flags: {c_values}"
+
+
 def test_generate_riddle_starts_and_stops_scorer(service, tmp_path):
     """service starts scorer server before codex exec and stops it after."""
     output = {

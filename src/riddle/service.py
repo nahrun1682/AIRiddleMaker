@@ -151,6 +151,7 @@ class RiddleService:
                     "-C", str(self.codex_home),
                     "-m", model,
                     "-c", f'model_reasoning_effort="{reasoning_effort}"',
+                    "-c", f'mcp_servers.scorer.url="http://localhost:{scorer_port}/mcp"',
                     "--dangerously-bypass-approvals-and-sandbox",
                     "-o", str(_OUTPUT_FILE),
                     prompt,
