@@ -1,0 +1,6 @@
+model = "o4-mini"
+model_reasoning_effort = "medium"
+web_search = "live"
+
+[features]
+multi_agent = true
