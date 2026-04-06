@@ -15,8 +15,8 @@ def _mock_openai_response(content: dict) -> MagicMock:
 
 PASSING_SCORE = {
     "uniqueness": True,
-    "single_paradox": True,
-    "observation_based": True,
+    "structural_soundness": True,
+    "concrete_grounding": True,
     "strict_score": 7.5,
     "passed": True,
     "reason": "良問",

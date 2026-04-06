@@ -183,8 +183,8 @@ class RiddleService:
 
         result = RiddleResult.model_validate(data)
         expected_pass = (
-            result.score.single_paradox
-            and result.score.observation_based
+            result.score.structural_soundness
+            and result.score.concrete_grounding
             and result.score.strict_score >= strict_threshold
         )
         if result.score.passed != expected_pass:

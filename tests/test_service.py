@@ -28,8 +28,8 @@ def test_generate_riddle_success(service, tmp_path):
         "pattern": "paradox",
         "score": {
             "uniqueness": True,
-            "single_paradox": True,
-            "observation_based": True,
+            "structural_soundness": True,
+            "concrete_grounding": True,
             "strict_score": 9.6,
             "passed": True,
             "reason": "r",
@@ -54,8 +54,8 @@ def test_generate_riddle_sets_codex_home(service, tmp_path):
         "question": "q", "answer": "a", "pattern": "pun",
         "score": {
             "uniqueness": True,
-            "single_paradox": True,
-            "observation_based": True,
+            "structural_soundness": True,
+            "concrete_grounding": True,
             "strict_score": 9.6,
             "passed": True,
             "reason": "r",
@@ -88,8 +88,8 @@ def test_generate_riddle_includes_theme_in_prompt(service, tmp_path):
         "question": "q", "answer": "a", "pattern": "pun",
         "score": {
             "uniqueness": True,
-            "single_paradox": True,
-            "observation_based": True,
+            "structural_soundness": True,
+            "concrete_grounding": True,
             "strict_score": 9.6,
             "passed": True,
             "reason": "r",
@@ -116,8 +116,8 @@ def test_generate_riddle_includes_max_retries_in_prompt(service, tmp_path):
         "pattern": "pun",
         "score": {
             "uniqueness": True,
-            "single_paradox": True,
-            "observation_based": True,
+            "structural_soundness": True,
+            "concrete_grounding": True,
             "strict_score": 9.6,
             "passed": True,
             "reason": "r",
@@ -143,8 +143,8 @@ def test_generate_riddle_includes_scorer_subagent_instruction(service, tmp_path)
         "pattern": "pun",
         "score": {
             "uniqueness": True,
-            "single_paradox": True,
-            "observation_based": True,
+            "structural_soundness": True,
+            "concrete_grounding": True,
             "strict_score": 9.6,
             "passed": True,
             "reason": "r",
@@ -168,8 +168,8 @@ def test_generate_riddle_passes_mcp_config_via_cli(service, tmp_path):
     output = {
         "question": "q", "answer": "a", "pattern": "pun",
         "score": {
-            "uniqueness": True, "single_paradox": True,
-            "observation_based": True, "strict_score": 9.6,
+            "uniqueness": True, "structural_soundness": True,
+            "concrete_grounding": True, "strict_score": 9.6,
             "passed": True, "reason": "r", "strict_review": "s",
         },
         "attempts": 1,
@@ -198,8 +198,8 @@ def test_generate_riddle_starts_and_stops_scorer(service, tmp_path):
     output = {
         "question": "q", "answer": "a", "pattern": "paradox",
         "score": {
-            "uniqueness": True, "single_paradox": True,
-            "observation_based": True, "strict_score": 9.6,
+            "uniqueness": True, "structural_soundness": True,
+            "concrete_grounding": True, "strict_score": 9.6,
             "passed": True, "reason": "r", "strict_review": "s",
         },
         "attempts": 1,
@@ -229,8 +229,8 @@ def test_generate_riddle_validates_strict_threshold(service, tmp_path):
         "pattern": "pun",
         "score": {
             "uniqueness": True,
-            "single_paradox": True,
-            "observation_based": True,
+            "structural_soundness": True,
+            "concrete_grounding": True,
             "strict_score": 9.6,
             "passed": True,
             "reason": "r",
@@ -254,8 +254,8 @@ def test_generate_riddle_requires_reason_fields_when_enabled(service, tmp_path):
         "pattern": "pun",
         "score": {
             "uniqueness": True,
-            "single_paradox": True,
-            "observation_based": True,
+            "structural_soundness": True,
+            "concrete_grounding": True,
             "strict_score": 9.6,
             "passed": True,
         },
@@ -286,8 +286,8 @@ def test_generate_riddle_uses_ephemeral_home(tmp_path):
     output = {
         "question": "q", "answer": "a", "pattern": "pun",
         "score": {
-            "uniqueness": True, "single_paradox": True,
-            "observation_based": True, "strict_score": 9.6,
+            "uniqueness": True, "structural_soundness": True,
+            "concrete_grounding": True, "strict_score": 9.6,
             "passed": True, "reason": "r", "strict_review": "s",
         },
         "attempts": 1,
@@ -330,8 +330,8 @@ def test_ephemeral_home_contains_sync_items(tmp_path):
     output = {
         "question": "q", "answer": "a", "pattern": "pun",
         "score": {
-            "uniqueness": True, "single_paradox": True,
-            "observation_based": True, "strict_score": 9.6,
+            "uniqueness": True, "structural_soundness": True,
+            "concrete_grounding": True, "strict_score": 9.6,
             "passed": True, "reason": "r", "strict_review": "s",
         },
         "attempts": 1,

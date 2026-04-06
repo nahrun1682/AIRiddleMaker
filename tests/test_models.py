@@ -10,8 +10,8 @@ def test_riddle_result_valid():
         pattern="paradox",
         score=ScoreDetail(
             uniqueness=True,
-            single_paradox=True,
-            observation_based=True,
+            structural_soundness=True,
+            concrete_grounding=True,
             strict_score=9.6,
             passed=True,
         ),
@@ -29,8 +29,8 @@ def test_riddle_result_from_json():
         "pattern": "pun",
         "score": {
             "uniqueness": true,
-            "single_paradox": false,
-            "observation_based": true,
+            "structural_soundness": false,
+            "concrete_grounding": true,
             "strict_score": 7.2,
             "passed": false
         },
@@ -48,8 +48,8 @@ def test_riddle_result_invalid_attempts():
             pattern="pun",
             score=ScoreDetail(
                 uniqueness=True,
-                single_paradox=True,
-                observation_based=True,
+                structural_soundness=True,
+                concrete_grounding=True,
                 strict_score=9.6,
                 passed=True,
             ),
@@ -60,8 +60,8 @@ def test_riddle_result_invalid_attempts():
 def test_score_detail_accepts_pass_when_all_conditions_met():
     score = ScoreDetail(
         uniqueness=True,
-        single_paradox=True,
-        observation_based=True,
+        structural_soundness=True,
+        concrete_grounding=True,
         strict_score=6.0,
         passed=True,
         reason="妥当",
@@ -74,15 +74,15 @@ def test_score_detail_accepts_pass_when_all_conditions_met():
 
 def test_score_detail_requires_strict_score_and_passed():
     with pytest.raises(ValidationError):
-        ScoreDetail(uniqueness=True, single_paradox=True, observation_based=True)
+        ScoreDetail(uniqueness=True, structural_soundness=True, concrete_grounding=True)
 
 
 def test_score_detail_rejects_inconsistent_passed():
     with pytest.raises(ValidationError):
         ScoreDetail(
             uniqueness=True,
-            single_paradox=False,
-            observation_based=True,
+            structural_soundness=False,
+            concrete_grounding=True,
             strict_score=6.9,
             passed=True,
         )

@@ -20,8 +20,8 @@ class ScoreRequest(BaseModel):
 
 class ScoreResponse(BaseModel):
     uniqueness: bool
-    single_paradox: bool
-    observation_based: bool
+    structural_soundness: bool
+    concrete_grounding: bool
     strict_score: float = Field(ge=0.0, le=10.0)
     passed: bool
     reason: str | None = None

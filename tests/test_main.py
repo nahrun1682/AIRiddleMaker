@@ -13,8 +13,8 @@ def _make_result(**kwargs) -> RiddleResult:
         pattern="pun",
         score=ScoreDetail(
             uniqueness=True,
-            single_paradox=True,
-            observation_based=True,
+            structural_soundness=True,
+            concrete_grounding=True,
             strict_score=9.6,
             passed=True,
             reason="既視感がある",
