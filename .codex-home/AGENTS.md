@@ -48,7 +48,5 @@
 - `paradox`: 逆説・現象系
 - `pun`: 同音異義・ダジャレ系
 - `char_extract`: 文字分解系
-- `reverse_read`: 逆読み・回文系
-- `char_add_remove`: 文字足し引き系
+- `reverse_read`: 逆読み系
 - `kanji_structure`: 漢字構造系
-- `nazokake`: なぞかけ三段謎
