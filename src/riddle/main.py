@@ -39,6 +39,8 @@ def main(args: list[str] | None = None) -> None:
             reasoning_effort=config.reasoning_effort,
             strict_threshold=config.strict_threshold,
             require_reason_fields=config.require_reason_fields,
+            scorer_port=config.scorer_port,
+            scorer_model=config.scorer_model,
         )
     except RuntimeError as e:
         print(f"エラー: {e}", file=sys.stderr)
