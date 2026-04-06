@@ -11,6 +11,14 @@ _OUTPUT_FILE = Path("/tmp/riddle_output.txt")
 class RiddleService:
     def __init__(self, codex_home: Path | None = None):
         self.codex_home = codex_home or Path(__file__).parent.parent.parent / ".codex-home"
+        self._ensure_auth_symlink()
+
+    def _ensure_auth_symlink(self) -> None:
+        auth_link = self.codex_home / "auth.json"
+        if not auth_link.exists():
+            default_auth = Path.home() / ".codex" / "auth.json"
+            if default_auth.exists():
+                auth_link.symlink_to(default_auth)
 
     def generate_riddle(self, pattern: str | None = None) -> RiddleResult:
         prompt = "なぞなぞを1問生成してください。"

@@ -1,4 +1,4 @@
-model = "o4-mini"
+model = "gpt-5.3-codex"
 model_reasoning_effort = "medium"
 web_search = "live"
 
