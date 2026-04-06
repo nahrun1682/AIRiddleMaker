@@ -101,9 +101,9 @@ class RiddleService:
         if theme:
             prompt += f"テーマ: {theme}。"
         if pattern:
-            prompt += f"パターン: {pattern}"
+            prompt += f"パターン: {pattern} に固定。他のパターンに切り替えてはいけません。"
         prompt += (
-            f"。最大{max_retries}回まで試行し、"
+            f"最大{max_retries}回まで試行し、"
             "採点は MCP ツール score_riddle を使って実施し、"
             f"strict_score は {strict_threshold} 以上を合格基準とし、"
             "strict_score / passed / reason / strict_review を含む指定JSONのみを出力してください。"
