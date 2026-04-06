@@ -3,4 +3,5 @@ model_reasoning_effort = "medium"
 web_search = "live"
 
 [mcp_servers.scorer]
+type = "streamable-http"
 url = "http://localhost:19120/mcp"

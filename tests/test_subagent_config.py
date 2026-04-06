@@ -17,6 +17,7 @@ def test_codex_config_has_mcp_scorer():
     assert "url" in scorer
     assert "19120" in scorer["url"]
     assert "/mcp" in scorer["url"]
+    assert scorer.get("type") == "streamable-http"
 
 
 def test_agents_md_references_mcp_tool():
