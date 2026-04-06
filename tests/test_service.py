@@ -163,7 +163,36 @@ def test_generate_riddle_includes_scorer_subagent_instruction(service, tmp_path)
         service.generate_riddle()
 
     prompt = mock_run.call_args[0][0][-1]
-    assert "サブエージェント `scorer`" in prompt
+    assert "score_riddle" in prompt
+
+
+def test_generate_riddle_starts_and_stops_scorer(service, tmp_path):
+    """service starts scorer server before codex exec and stops it after."""
+    output = {
+        "question": "q", "answer": "a", "pattern": "paradox",
+        "score": {
+            "uniqueness": True, "single_paradox": True,
+            "observation_based": True, "strict_score": 9.6,
+            "passed": True, "reason": "r", "strict_review": "s",
+        },
+        "attempts": 1,
+    }
+    output_file = tmp_path / "out.txt"
+    output_file.write_text(json.dumps(output))
+
+    mock_proc = MagicMock()
+    mock_proc.poll.return_value = None
+
+    with patch("riddle.service.subprocess.run", return_value=_mock_run(output)), \
+         patch("riddle.service._OUTPUT_FILE", output_file), \
+         patch("riddle.service.subprocess.Popen", return_value=mock_proc) as mock_popen, \
+         patch("riddle.service.urllib.request.urlopen"):
+        service.generate_riddle(scorer_port=19120, scorer_model="gpt-5.4")
+
+    mock_popen.assert_called_once()
+    popen_cmd = mock_popen.call_args[0][0]
+    assert "scorer_server" in " ".join(str(x) for x in popen_cmd)
+    mock_proc.terminate.assert_called_once()
 
 
 def test_generate_riddle_validates_strict_threshold(service, tmp_path):

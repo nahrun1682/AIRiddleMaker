@@ -5,6 +5,8 @@ import subprocess
 import sys
 import threading
 import time
+import urllib.request
+import urllib.error
 from pathlib import Path
 
 from riddle.log_stream import SessionTailer, format_event
@@ -62,6 +64,35 @@ class RiddleService:
             else:
                 shutil.copy2(src, dst)
 
+    def _start_scorer_server(self, port: int, model: str) -> subprocess.Popen:
+        """Start scorer MCP server as background process."""
+        env = {
+            **os.environ,
+            **_load_dotenv(Path(__file__).parent.parent.parent / ".env"),
+        }
+        proc = subprocess.Popen(
+            [
+                sys.executable, "-m", "riddle.scorer_server",
+                "--port", str(port),
+                "--model", model,
+            ],
+            env=env,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+        )
+        url = f"http://localhost:{port}/docs"
+        for _ in range(50):
+            try:
+                urllib.request.urlopen(url, timeout=1)
+                return proc
+            except (urllib.error.URLError, ConnectionError):
+                time.sleep(0.2)
+                if proc.poll() is not None:
+                    stderr = proc.stderr.read().decode() if proc.stderr else ""
+                    raise RuntimeError(f"Scorer server failed to start: {stderr}")
+        proc.terminate()
+        raise RuntimeError("Scorer server startup timed out")
+
     def generate_riddle(
         self,
         pattern: str | None = None,
@@ -72,6 +103,8 @@ class RiddleService:
         reasoning_effort: str = "medium",
         strict_threshold: float = 6.0,
         require_reason_fields: bool = True,
+        scorer_port: int = 19120,
+        scorer_model: str = "gpt-5.4",
     ) -> RiddleResult:
         if max_retries < 1:
             raise ValueError("max_retries must be >= 1")
@@ -83,7 +116,7 @@ class RiddleService:
             prompt += f"パターン: {pattern}"
         prompt += (
             f"。最大{max_retries}回まで試行し、"
-            "採点は必ずサブエージェント `scorer` を使って実施し、"
+            "採点は MCP ツール score_riddle を使って実施し、"
             f"strict_score は {strict_threshold} 以上を合格基準とし、"
             "strict_score / passed / reason / strict_review を含む指定JSONのみを出力してください。"
         )
@@ -110,6 +143,7 @@ class RiddleService:
             trace_thread = threading.Thread(target=_trace_loop, daemon=True)
             trace_thread.start()
 
+        scorer_proc = self._start_scorer_server(scorer_port, scorer_model)
         try:
             proc = subprocess.run(
                 [
@@ -126,6 +160,7 @@ class RiddleService:
                 text=True,
             )
         finally:
+            scorer_proc.terminate()
             if trace:
                 stop_trace.set()
                 if trace_thread is not None:
