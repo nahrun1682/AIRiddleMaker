@@ -58,6 +58,10 @@ class RiddleService:
             **os.environ,
             **_load_dotenv(Path(__file__).parent.parent.parent / ".env"),
         }
+        # stderr をファイルに書き出す（PIPE だとバッファ満杯でプロセスがブロックする）
+        self._scorer_log = tempfile.NamedTemporaryFile(
+            prefix="riddle-scorer-", suffix=".log", delete=False, mode="w",
+        )
         proc = subprocess.Popen(
             [
                 sys.executable, "-m", "riddle.scorer_server",
@@ -66,7 +70,7 @@ class RiddleService:
             ],
             env=env,
             stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
+            stderr=self._scorer_log,
         )
         url = f"http://localhost:{port}/docs"
         for _ in range(50):
@@ -76,7 +80,8 @@ class RiddleService:
             except (urllib.error.URLError, ConnectionError):
                 time.sleep(0.2)
                 if proc.poll() is not None:
-                    stderr = proc.stderr.read().decode() if proc.stderr else ""
+                    self._scorer_log.flush()
+                    stderr = Path(self._scorer_log.name).read_text()
                     raise RuntimeError(f"Scorer server failed to start: {stderr}")
         proc.terminate()
         raise RuntimeError("Scorer server startup timed out")
@@ -152,6 +157,12 @@ class RiddleService:
                 )
             finally:
                 scorer_proc.terminate()
+                if hasattr(self, "_scorer_log"):
+                    self._scorer_log.close()
+                    try:
+                        os.unlink(self._scorer_log.name)
+                    except OSError:
+                        pass
                 if trace:
                     stop_trace.set()
                     if trace_thread is not None:
