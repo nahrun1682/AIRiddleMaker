@@ -46,7 +46,7 @@ def create_app(model: str = "gpt-5.4", api_key: str | None = None) -> FastAPI:
         description="日本語なぞなぞ採点 MCP サーバー",
     )
 
-    @app.post("/score", response_model=ScoreResponse)
+    @app.post("/score", response_model=ScoreResponse, operation_id="score_riddle")
     def score_riddle(req: ScoreRequest) -> ScoreResponse:
         """なぞなぞを採点し、スコアと合否を返す。"""
         system_prompt = _load_system_prompt()

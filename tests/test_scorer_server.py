@@ -74,3 +74,14 @@ def test_score_sends_system_prompt(client):
     system_msg = messages[0]["content"]
     assert "採点エージェント" in system_msg
     assert "strict_score" in system_msg
+
+
+def test_score_operation_id_is_score_riddle():
+    """MCP tool name must be exactly 'score_riddle' for Codex to discover it."""
+    from riddle.scorer_server import create_app
+    from fastapi.openapi.utils import get_openapi
+
+    app = create_app(model="gpt-5.4", api_key="test-key")
+    schema = get_openapi(title=app.title, version=app.version, routes=app.routes)
+    score_op = schema["paths"]["/score"]["post"]
+    assert score_op["operationId"] == "score_riddle"
