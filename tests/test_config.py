@@ -67,3 +67,13 @@ def test_load_riddle_config_scorer_absent_uses_defaults(tmp_path):
     config = load_riddle_config(cfg)
     assert config.scorer_model == "gpt-5.4"
     assert config.scorer_port == 19120
+
+
+def test_riddle_toml_has_scorer_section():
+    """The shipped riddle.toml must include [scorer] with model and port."""
+    import tomllib
+
+    data = tomllib.loads(Path("riddle.toml").read_text(encoding="utf-8"))
+    assert "scorer" in data
+    assert "model" in data["scorer"]
+    assert "port" in data["scorer"]

@@ -4,3 +4,7 @@ max_retries = 10
 strict_threshold = 6.0
 require_reason_fields = true
 trace_default = false
+
+[scorer]
+model = "gpt-5.4"
+port = 19120
