@@ -289,3 +289,104 @@ def test_generate_riddle_max_retries(service, tmp_path):
          patch("riddle.service._OUTPUT_FILE", output_file):
         with pytest.raises(RuntimeError, match="max_retries_exceeded"):
             service.generate_riddle()
+
+
+def test_generate_riddle_uses_ephemeral_home(tmp_path):
+    """generate_riddle() creates a fresh temp dir for CODEX_HOME and removes it after."""
+    output = {
+        "question": "q", "answer": "a", "pattern": "pun",
+        "score": {
+            "uniqueness": True, "single_paradox": True,
+            "observation_based": True, "strict_score": 9.6,
+            "passed": True, "reason": "r", "strict_review": "s",
+        },
+        "attempts": 1,
+    }
+    output_file = tmp_path / "out.txt"
+    output_file.write_text(json.dumps(output))
+
+    codex_home_used = None
+
+    def capture_run(cmd, **kwargs):
+        nonlocal codex_home_used
+        env = kwargs.get("env", {})
+        codex_home_used = env.get("CODEX_HOME")
+        return _mock_run(output)
+
+    with patch.object(RiddleService, "_sync_runtime_home"):
+        svc = RiddleService(codex_home=tmp_path / ".codex-home")
+
+    mock_proc = MagicMock()
+    mock_proc.poll.return_value = None
+
+    with patch("riddle.service.subprocess.run", side_effect=capture_run), \
+         patch("riddle.service._OUTPUT_FILE", output_file), \
+         patch("riddle.service.subprocess.Popen", return_value=mock_proc), \
+         patch("riddle.service.urllib.request.urlopen"):
+        svc.generate_riddle()
+
+    # The CODEX_HOME should have been a temp dir, not the fixed ~/.riddle-codex
+    assert codex_home_used is not None, "CODEX_HOME was not set in env"
+    assert "/tmp" in codex_home_used or "tmp" in codex_home_used.lower(), \
+        f"CODEX_HOME should be a temp dir, got: {codex_home_used}"
+    assert str(Path.home() / ".riddle-codex") not in codex_home_used, \
+        "CODEX_HOME should not be the fixed ~/.riddle-codex path"
+    # After generate_riddle returns, the ephemeral dir must be cleaned up
+    assert not Path(codex_home_used).exists(), \
+        f"Ephemeral CODEX_HOME should be removed after execution, but {codex_home_used} still exists"
+
+
+def test_ephemeral_home_contains_sync_items(tmp_path):
+    """Ephemeral dir has AGENTS.md, .codex/, auth.json but NO sessions/ or tmp/."""
+    output = {
+        "question": "q", "answer": "a", "pattern": "pun",
+        "score": {
+            "uniqueness": True, "single_paradox": True,
+            "observation_based": True, "strict_score": 9.6,
+            "passed": True, "reason": "r", "strict_review": "s",
+        },
+        "attempts": 1,
+    }
+    output_file = tmp_path / "out.txt"
+    output_file.write_text(json.dumps(output))
+
+    # Create source files that should be synced into ephemeral home
+    source_home = tmp_path / ".codex-home"
+    source_home.mkdir()
+    (source_home / "AGENTS.md").write_text("# Agents")
+    (source_home / ".codex").mkdir()
+    (source_home / ".codex" / "config.toml").write_text("[settings]")
+    (source_home / "auth.json").write_text("{}")
+
+    ephemeral_contents: dict[str, bool] = {}
+
+    def capture_run(cmd, **kwargs):
+        env = kwargs.get("env", {})
+        codex_home = env.get("CODEX_HOME", "")
+        if codex_home:
+            p = Path(codex_home)
+            ephemeral_contents["AGENTS.md"] = (p / "AGENTS.md").exists()
+            ephemeral_contents[".codex"] = (p / ".codex").is_dir()
+            ephemeral_contents["auth.json"] = (p / "auth.json").exists()
+            ephemeral_contents["sessions_absent"] = not (p / "sessions").exists()
+            ephemeral_contents["tmp_absent"] = not (p / "tmp").exists()
+        return _mock_run(output)
+
+    with patch.object(RiddleService, "_sync_runtime_home"):
+        svc = RiddleService(codex_home=source_home)
+    svc._source_home = source_home
+
+    mock_proc = MagicMock()
+    mock_proc.poll.return_value = None
+
+    with patch("riddle.service.subprocess.run", side_effect=capture_run), \
+         patch("riddle.service._OUTPUT_FILE", output_file), \
+         patch("riddle.service.subprocess.Popen", return_value=mock_proc), \
+         patch("riddle.service.urllib.request.urlopen"):
+        svc.generate_riddle()
+
+    assert ephemeral_contents.get("AGENTS.md"), "AGENTS.md should exist in ephemeral home"
+    assert ephemeral_contents.get(".codex"), ".codex/ should exist in ephemeral home"
+    assert ephemeral_contents.get("auth.json"), "auth.json should exist in ephemeral home"
+    assert ephemeral_contents.get("sessions_absent"), "sessions/ should NOT exist in ephemeral home"
+    assert ephemeral_contents.get("tmp_absent"), "tmp/ should NOT exist in ephemeral home"
