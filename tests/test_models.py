@@ -62,10 +62,10 @@ def test_score_detail_accepts_pass_when_all_conditions_met():
         uniqueness=True,
         single_paradox=True,
         observation_based=True,
-        strict_score=9.5,
+        strict_score=6.0,
         passed=True,
         reason="妥当",
-        strict_review="厳しく評価：9.5/10点（合格）",
+        strict_review="厳しく評価：6.0/10点（合格）",
     )
     assert score.passed is True
     assert score.reason == "妥当"
@@ -81,8 +81,8 @@ def test_score_detail_rejects_inconsistent_passed():
     with pytest.raises(ValidationError):
         ScoreDetail(
             uniqueness=True,
-            single_paradox=True,
+            single_paradox=False,
             observation_based=True,
-            strict_score=9.4,
+            strict_score=6.9,
             passed=True,
         )

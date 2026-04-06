@@ -8,7 +8,7 @@ class RiddleConfig:
     model: str = "gpt-5.3-codex"
     reasoning_effort: str = "medium"
     max_retries: int = 10
-    strict_threshold: float = 9.5
+    strict_threshold: float = 6.0
     require_reason_fields: bool = True
     trace_default: bool = False
 

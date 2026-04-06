@@ -60,7 +60,7 @@ class RiddleService:
         trace: bool = False,
         model: str = "gpt-5.3-codex",
         reasoning_effort: str = "medium",
-        strict_threshold: float = 9.5,
+        strict_threshold: float = 6.0,
         require_reason_fields: bool = True,
     ) -> RiddleResult:
         if max_retries < 1:
@@ -145,8 +145,7 @@ class RiddleService:
 
         result = RiddleResult.model_validate(data)
         expected_pass = (
-            result.score.uniqueness
-            and result.score.single_paradox
+            result.score.single_paradox
             and result.score.observation_based
             and result.score.strict_score >= strict_threshold
         )

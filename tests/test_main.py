@@ -51,7 +51,7 @@ def test_main_pattern_option(capsys):
         trace=False,
         model="gpt-5.4",
         reasoning_effort="medium",
-        strict_threshold=9.5,
+        strict_threshold=6.0,
         require_reason_fields=True,
     )
 
@@ -68,7 +68,7 @@ def test_main_prompts_for_theme_when_not_given(capsys):
         trace=False,
         model="gpt-5.4",
         reasoning_effort="medium",
-        strict_threshold=9.5,
+        strict_threshold=6.0,
         require_reason_fields=True,
     )
 
@@ -85,7 +85,7 @@ def test_main_max_retries_option(capsys):
         trace=False,
         model="gpt-5.4",
         reasoning_effort="medium",
-        strict_threshold=9.5,
+        strict_threshold=6.0,
         require_reason_fields=True,
     )
 
@@ -102,7 +102,7 @@ def test_main_trace_option():
         trace=True,
         model="gpt-5.4",
         reasoning_effort="medium",
-        strict_threshold=9.5,
+        strict_threshold=6.0,
         require_reason_fields=True,
     )
 

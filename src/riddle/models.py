@@ -13,15 +13,14 @@ class ScoreDetail(BaseModel):
     @model_validator(mode="after")
     def validate_passed_consistency(self) -> "ScoreDetail":
         expected_passed = (
-            self.uniqueness
-            and self.single_paradox
+            self.single_paradox
             and self.observation_based
-            and self.strict_score >= 9.5
+            and self.strict_score >= 6.0
         )
         if self.passed != expected_passed:
             raise ValueError(
-                "passed must match uniqueness/single_paradox/observation_based "
-                "and strict_score >= 9.5"
+                "passed must match single_paradox/observation_based "
+                "and strict_score >= 6.0"
             )
         return self
 

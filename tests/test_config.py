@@ -9,7 +9,7 @@ def test_load_riddle_config_defaults_when_file_missing(tmp_path):
     assert config.model == "gpt-5.3-codex"
     assert config.reasoning_effort == "medium"
     assert config.max_retries == 10
-    assert config.strict_threshold == 9.5
+    assert config.strict_threshold == 6.0
     assert config.require_reason_fields is True
     assert config.trace_default is False
 
