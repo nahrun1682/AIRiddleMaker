@@ -12,7 +12,10 @@ from riddle.models import RiddleResult
 
 _OUTPUT_FILE = Path("/tmp/riddle_output.txt")
 
-_SYNC_ITEMS = ["AGENTS.md", "config.toml", "agents", "skills", "auth.json"]
+_SYNC_ITEMS = ["AGENTS.md", ".codex", "auth.json"]
+
+# Items from old flat structure that should be removed from runtime dir
+_STALE_ITEMS = ["config.toml", "agents", "skills"]
 
 
 def _load_dotenv(path: Path) -> dict[str, str]:
@@ -40,6 +43,13 @@ class RiddleService:
     def _sync_runtime_home(self) -> None:
         """Copy config from repo .codex-home/ to runtime dir outside project tree."""
         self.codex_home.mkdir(parents=True, exist_ok=True)
+        # Remove stale items from old flat structure
+        for item in _STALE_ITEMS:
+            stale = self.codex_home / item
+            if stale.is_dir():
+                shutil.rmtree(stale)
+            elif stale.exists():
+                stale.unlink()
         for item in _SYNC_ITEMS:
             src = self._source_home / item
             dst = self.codex_home / item

@@ -14,7 +14,7 @@
 ## ループ手順（最大N回繰り返し）
 
 ### Step 1: 生成
-`skills/generate/generate.md` の制約に従い、なぞなぞを **1問だけ** 生成する。
+`.codex/skills/generate/generate.md` の制約に従い、なぞなぞを **1問だけ** 生成する。
 
 ### Step 2: ウェブ検索チェック
 生成した問題文をそのままウェブ検索する。
@@ -23,7 +23,7 @@
 
 ### Step 3: scorer で採点
 サブエージェント `scorer` に問題文と答えを渡し、採点結果のJSONを受け取る。
-scorer の合格ラインは **strict_score >= 6.0**（uniqueness はソフトファクター）。scorer.md に定義された基準に従うこと。
+scorer の合格ラインは **strict_score >= 6.0**（uniqueness はソフトファクター）。scorer サブエージェントに定義された基準に従うこと。
 - `passed: false` → **ボツ**。scorer の `reason` と `strict_review` の「厳しい点」を読み、**同じ弱点を持つ候補を作らないよう意識して** Step 1 へ戻る
 - `passed: true` → **採択**。出力へ進む
 
