@@ -53,6 +53,8 @@ def test_main_pattern_option(capsys):
         reasoning_effort="medium",
         strict_threshold=6.0,
         require_reason_fields=True,
+        scorer_port=19120,
+        scorer_model="gpt-5.4",
     )
 
 
@@ -70,6 +72,8 @@ def test_main_prompts_for_theme_when_not_given(capsys):
         reasoning_effort="medium",
         strict_threshold=6.0,
         require_reason_fields=True,
+        scorer_port=19120,
+        scorer_model="gpt-5.4",
     )
 
 
@@ -87,6 +91,8 @@ def test_main_max_retries_option(capsys):
         reasoning_effort="medium",
         strict_threshold=6.0,
         require_reason_fields=True,
+        scorer_port=19120,
+        scorer_model="gpt-5.4",
     )
 
 
@@ -104,6 +110,8 @@ def test_main_trace_option():
         reasoning_effort="medium",
         strict_threshold=6.0,
         require_reason_fields=True,
+        scorer_port=19120,
+        scorer_model="gpt-5.4",
     )
 
 
@@ -134,6 +142,8 @@ def test_main_uses_config_values(capsys, monkeypatch):
         reasoning_effort="high",
         strict_threshold=9.7,
         require_reason_fields=False,
+        scorer_port=19120,
+        scorer_model="gpt-5.4",
     )
 
 
