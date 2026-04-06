@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import urllib.request
@@ -15,9 +16,6 @@ from riddle.models import RiddleResult
 _OUTPUT_FILE = Path("/tmp/riddle_output.txt")
 
 _SYNC_ITEMS = ["AGENTS.md", ".codex", "auth.json"]
-
-# Items from old flat structure that should be removed from runtime dir
-_STALE_ITEMS = ["config.toml", "agents", "skills", "tmp", "sessions"]
 
 
 def _load_dotenv(path: Path) -> dict[str, str]:
@@ -39,30 +37,23 @@ def _load_dotenv(path: Path) -> dict[str, str]:
 class RiddleService:
     def __init__(self, codex_home: Path | None = None):
         self._source_home = codex_home or Path(__file__).parent.parent.parent / ".codex-home"
-        self.codex_home = Path.home() / ".riddle-codex"
-        self._sync_runtime_home()
 
     def _sync_runtime_home(self) -> None:
-        """Copy config from repo .codex-home/ to runtime dir outside project tree."""
-        self.codex_home.mkdir(parents=True, exist_ok=True)
-        # Remove stale items from old flat structure
-        for item in _STALE_ITEMS:
-            stale = self.codex_home / item
-            if stale.is_dir():
-                shutil.rmtree(stale)
-            elif stale.exists():
-                stale.unlink()
+        """Deprecated — no-op kept for backward compatibility."""
+
+    def _create_ephemeral_home(self) -> Path:
+        """Create a disposable CODEX_HOME with only config files, no history."""
+        ephemeral = Path(tempfile.mkdtemp(prefix="riddle-codex-"))
         for item in _SYNC_ITEMS:
             src = self._source_home / item
-            dst = self.codex_home / item
+            dst = ephemeral / item
             if not src.exists():
                 continue
             if src.is_dir():
-                if dst.exists():
-                    shutil.rmtree(dst)
                 shutil.copytree(src, dst)
             else:
                 shutil.copy2(src, dst)
+        return ephemeral
 
     def _start_scorer_server(self, port: int, model: str) -> subprocess.Popen:
         """Start scorer MCP server as background process."""
@@ -121,54 +112,58 @@ class RiddleService:
             "strict_score / passed / reason / strict_review を含む指定JSONのみを出力してください。"
         )
 
-        env = {
-            **os.environ,
-            **_load_dotenv(Path(__file__).parent.parent.parent / ".env"),
-            "CODEX_HOME": str(self.codex_home),
-        }
-
-        stop_trace = threading.Event()
-        trace_thread: threading.Thread | None = None
-        tailer: SessionTailer | None = None
-        if trace:
-            tailer = SessionTailer(self.codex_home, time.time())
-
-            def _trace_loop() -> None:
-                assert tailer is not None
-                while not stop_trace.is_set():
-                    for event in tailer.poll():
-                        print(format_event(event), file=sys.stderr)
-                    time.sleep(0.2)
-
-            trace_thread = threading.Thread(target=_trace_loop, daemon=True)
-            trace_thread.start()
-
-        scorer_proc = self._start_scorer_server(scorer_port, scorer_model)
+        ephemeral_home = self._create_ephemeral_home()
         try:
-            proc = subprocess.run(
-                [
-                    "codex", "exec",
-                    "-C", str(self.codex_home),
-                    "-m", model,
-                    "-c", f'model_reasoning_effort="{reasoning_effort}"',
-                    "-c", f'mcp_servers.scorer.url="http://localhost:{scorer_port}/mcp"',
-                    "--dangerously-bypass-approvals-and-sandbox",
-                    "-o", str(_OUTPUT_FILE),
-                    prompt,
-                ],
-                env=env,
-                capture_output=True,
-                text=True,
-            )
-        finally:
-            scorer_proc.terminate()
+            env = {
+                **os.environ,
+                **_load_dotenv(Path(__file__).parent.parent.parent / ".env"),
+                "CODEX_HOME": str(ephemeral_home),
+            }
+
+            stop_trace = threading.Event()
+            trace_thread: threading.Thread | None = None
+            tailer: SessionTailer | None = None
             if trace:
-                stop_trace.set()
-                if trace_thread is not None:
-                    trace_thread.join(timeout=1.0)
-                if tailer is not None:
-                    for event in tailer.poll():
-                        print(format_event(event), file=sys.stderr)
+                tailer = SessionTailer(ephemeral_home, time.time())
+
+                def _trace_loop() -> None:
+                    assert tailer is not None
+                    while not stop_trace.is_set():
+                        for event in tailer.poll():
+                            print(format_event(event), file=sys.stderr)
+                        time.sleep(0.2)
+
+                trace_thread = threading.Thread(target=_trace_loop, daemon=True)
+                trace_thread.start()
+
+            scorer_proc = self._start_scorer_server(scorer_port, scorer_model)
+            try:
+                proc = subprocess.run(
+                    [
+                        "codex", "exec",
+                        "-C", str(ephemeral_home),
+                        "-m", model,
+                        "-c", f'model_reasoning_effort="{reasoning_effort}"',
+                        "-c", f'mcp_servers.scorer.url="http://localhost:{scorer_port}/mcp"',
+                        "--dangerously-bypass-approvals-and-sandbox",
+                        "-o", str(_OUTPUT_FILE),
+                        prompt,
+                    ],
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                )
+            finally:
+                scorer_proc.terminate()
+                if trace:
+                    stop_trace.set()
+                    if trace_thread is not None:
+                        trace_thread.join(timeout=1.0)
+                    if tailer is not None:
+                        for event in tailer.poll():
+                            print(format_event(event), file=sys.stderr)
+        finally:
+            shutil.rmtree(ephemeral_home, ignore_errors=True)
 
         if proc.returncode != 0:
             stderr_msg = proc.stderr.strip() if proc.stderr else "unknown error"
