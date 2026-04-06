@@ -196,6 +196,13 @@ def test_generate_riddle_passes_mcp_config_via_cli(service, tmp_path):
     assert mcp_config, f"No MCP server config in -c flags: {c_values}"
 
 
+def test_stale_items_includes_tmp_and_sessions():
+    """Old tmp/ and sessions/ dirs should be cleaned on each sync."""
+    from riddle.service import _STALE_ITEMS
+    assert "tmp" in _STALE_ITEMS
+    assert "sessions" in _STALE_ITEMS
+
+
 def test_generate_riddle_starts_and_stops_scorer(service, tmp_path):
     """service starts scorer server before codex exec and stops it after."""
     output = {

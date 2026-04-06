@@ -17,7 +17,7 @@ _OUTPUT_FILE = Path("/tmp/riddle_output.txt")
 _SYNC_ITEMS = ["AGENTS.md", ".codex", "auth.json"]
 
 # Items from old flat structure that should be removed from runtime dir
-_STALE_ITEMS = ["config.toml", "agents", "skills"]
+_STALE_ITEMS = ["config.toml", "agents", "skills", "tmp", "sessions"]
 
 
 def _load_dotenv(path: Path) -> dict[str, str]:
