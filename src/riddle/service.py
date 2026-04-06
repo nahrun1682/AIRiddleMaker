@@ -38,9 +38,6 @@ class RiddleService:
     def __init__(self, codex_home: Path | None = None):
         self._source_home = codex_home or Path(__file__).parent.parent.parent / ".codex-home"
 
-    def _sync_runtime_home(self) -> None:
-        """Deprecated — no-op kept for backward compatibility."""
-
     def _create_ephemeral_home(self) -> Path:
         """Create a disposable CODEX_HOME with only config files, no history."""
         ephemeral = Path(tempfile.mkdtemp(prefix="riddle-codex-"))

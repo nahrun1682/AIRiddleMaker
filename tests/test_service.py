@@ -10,10 +10,7 @@ from riddle.service import RiddleService
 
 @pytest.fixture
 def service(tmp_path):
-    with patch.object(RiddleService, "_sync_runtime_home"):
-        svc = RiddleService(codex_home=tmp_path / ".codex-home")
-    svc.codex_home = tmp_path / ".codex-home"
-    svc.codex_home.mkdir(parents=True, exist_ok=True)
+    svc = RiddleService(codex_home=tmp_path / ".codex-home")
     return svc
 
 
@@ -77,7 +74,7 @@ def test_generate_riddle_sets_codex_home(service, tmp_path):
     env = call_kwargs.kwargs.get("env") or {}
     cmd = call_kwargs.args[0]
     assert "CODEX_HOME" in env
-    assert ".codex-home" in env["CODEX_HOME"]
+    assert "riddle-codex-" in env["CODEX_HOME"]
     assert "-C" in cmd
     assert env["CODEX_HOME"] in cmd
     assert "-m" in cmd
@@ -196,13 +193,6 @@ def test_generate_riddle_passes_mcp_config_via_cli(service, tmp_path):
     assert mcp_config, f"No MCP server config in -c flags: {c_values}"
 
 
-def test_stale_items_includes_tmp_and_sessions():
-    """Old tmp/ and sessions/ dirs should be cleaned on each sync."""
-    from riddle.service import _STALE_ITEMS
-    assert "tmp" in _STALE_ITEMS
-    assert "sessions" in _STALE_ITEMS
-
-
 def test_generate_riddle_starts_and_stops_scorer(service, tmp_path):
     """service starts scorer server before codex exec and stops it after."""
     output = {
@@ -313,8 +303,7 @@ def test_generate_riddle_uses_ephemeral_home(tmp_path):
         codex_home_used = env.get("CODEX_HOME")
         return _mock_run(output)
 
-    with patch.object(RiddleService, "_sync_runtime_home"):
-        svc = RiddleService(codex_home=tmp_path / ".codex-home")
+    svc = RiddleService(codex_home=tmp_path / ".codex-home")
 
     mock_proc = MagicMock()
     mock_proc.poll.return_value = None
@@ -372,9 +361,7 @@ def test_ephemeral_home_contains_sync_items(tmp_path):
             ephemeral_contents["tmp_absent"] = not (p / "tmp").exists()
         return _mock_run(output)
 
-    with patch.object(RiddleService, "_sync_runtime_home"):
-        svc = RiddleService(codex_home=source_home)
-    svc._source_home = source_home
+    svc = RiddleService(codex_home=source_home)
 
     mock_proc = MagicMock()
     mock_proc.poll.return_value = None
