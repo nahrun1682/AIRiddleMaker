@@ -8,7 +8,13 @@ def test_riddle_result_valid():
         question="食べるほど減るのに、食べないと増えるものは？",
         answer="食欲",
         pattern="paradox",
-        score=ScoreDetail(uniqueness=True, single_paradox=True, observation_based=True),
+        score=ScoreDetail(
+            uniqueness=True,
+            single_paradox=True,
+            observation_based=True,
+            strict_score=9.6,
+            passed=True,
+        ),
         attempts=2,
     )
     assert result.question == "食べるほど減るのに、食べないと増えるものは？"
@@ -21,7 +27,13 @@ def test_riddle_result_from_json():
         "question": "テスト問題",
         "answer": "テスト答え",
         "pattern": "pun",
-        "score": {"uniqueness": true, "single_paradox": false, "observation_based": true},
+        "score": {
+            "uniqueness": true,
+            "single_paradox": false,
+            "observation_based": true,
+            "strict_score": 7.2,
+            "passed": false
+        },
         "attempts": 1
     }"""
     result = RiddleResult.model_validate_json(json_str)
@@ -34,16 +46,43 @@ def test_riddle_result_invalid_attempts():
             question="q",
             answer="a",
             pattern="pun",
-            score=ScoreDetail(uniqueness=True, single_paradox=True, observation_based=True),
+            score=ScoreDetail(
+                uniqueness=True,
+                single_paradox=True,
+                observation_based=True,
+                strict_score=9.6,
+                passed=True,
+            ),
             attempts=0,
         )
 
 
-def test_score_detail_passed_all_true():
-    score = ScoreDetail(uniqueness=True, single_paradox=True, observation_based=True)
+def test_score_detail_accepts_pass_when_all_conditions_met():
+    score = ScoreDetail(
+        uniqueness=True,
+        single_paradox=True,
+        observation_based=True,
+        strict_score=9.5,
+        passed=True,
+        reason="妥当",
+        strict_review="厳しく評価：9.5/10点（合格）",
+    )
     assert score.passed is True
+    assert score.reason == "妥当"
+    assert "厳しく評価" in score.strict_review
 
 
-def test_score_detail_passed_any_false():
-    score = ScoreDetail(uniqueness=True, single_paradox=False, observation_based=True)
-    assert score.passed is False
+def test_score_detail_requires_strict_score_and_passed():
+    with pytest.raises(ValidationError):
+        ScoreDetail(uniqueness=True, single_paradox=True, observation_based=True)
+
+
+def test_score_detail_rejects_inconsistent_passed():
+    with pytest.raises(ValidationError):
+        ScoreDetail(
+            uniqueness=True,
+            single_paradox=True,
+            observation_based=True,
+            strict_score=9.4,
+            passed=True,
+        )
