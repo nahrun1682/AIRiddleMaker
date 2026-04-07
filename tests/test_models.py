@@ -77,12 +77,24 @@ def test_score_detail_requires_strict_score_and_passed():
         ScoreDetail(uniqueness=True, structural_soundness=True, concrete_grounding=True)
 
 
-def test_score_detail_rejects_inconsistent_passed():
-    with pytest.raises(ValidationError):
-        ScoreDetail(
-            uniqueness=True,
-            structural_soundness=False,
-            concrete_grounding=True,
-            strict_score=6.9,
-            passed=True,
-        )
+def test_score_detail_accepts_inconsistent_passed():
+    score = ScoreDetail(
+        uniqueness=True,
+        structural_soundness=False,
+        concrete_grounding=True,
+        strict_score=6.9,
+        passed=True,
+    )
+    assert score.passed is True
+
+
+def test_score_detail_expected_pass_uses_given_threshold():
+    score = ScoreDetail(
+        uniqueness=True,
+        structural_soundness=True,
+        concrete_grounding=True,
+        strict_score=7.0,
+        passed=False,
+    )
+    assert score.expected_pass(6.0) is True
+    assert score.expected_pass(8.0) is False
