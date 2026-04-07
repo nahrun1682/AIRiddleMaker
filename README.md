@@ -26,7 +26,7 @@ uv sync
 ### 実行
 
 ```bash
-uv run riddle --max-retries 20 --trace
+uv run riddle --pattern pun --max-retries 20 --trace 
 ```
 
 起動するとテーマの入力を求められます。入力後、なぞなぞの生成→ウェブ検索→MCP 採点のループが自動で回ります。
@@ -34,7 +34,7 @@ uv run riddle --max-retries 20 --trace
 | オプション | 説明 | デフォルト |
 |---|---|---|
 | `--max-retries N` | 生成ループ上限回数 | 10 |
-| `--pattern TYPE` | 生成パターン指定 (paradox/pun/char_extract 等) | なし |
+| `--pattern TYPE` | 生成パターン指定 (paradox/pun/char_extract/reverse_read/kanji_structure) | なし |
 | `--trace` | Codex セッションイベントをリアルタイム表示 | off |
 
 設定は `riddle.toml` で変更できます。

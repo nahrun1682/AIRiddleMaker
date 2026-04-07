@@ -157,6 +157,11 @@ class RiddleService:
                 )
             finally:
                 scorer_proc.terminate()
+                try:
+                    scorer_proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    scorer_proc.kill()
+                    scorer_proc.wait(timeout=3)
                 if hasattr(self, "_scorer_log"):
                     self._scorer_log.close()
                     try:
