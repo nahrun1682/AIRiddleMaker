@@ -13,8 +13,8 @@ def _make_result(**kwargs) -> RiddleResult:
         pattern="pun",
         score=ScoreDetail(
             uniqueness=True,
-            single_paradox=True,
-            observation_based=True,
+            structural_soundness=True,
+            concrete_grounding=True,
             strict_score=9.6,
             passed=True,
             reason="既視感がある",
@@ -39,7 +39,8 @@ def test_main_outputs_riddle(capsys):
     assert "厳しく評価：9.6/10点" in captured.out
 
 
-def test_main_pattern_option(capsys):
+def test_main_pattern_option(capsys, monkeypatch):
+    monkeypatch.setenv("RIDDLE_CONFIG_FILE", "/tmp/nonexistent-riddle-test.toml")
     with patch("riddle.main.RiddleService") as MockService, patch("builtins.input", return_value=""):
         MockService.return_value.generate_riddle.return_value = _make_result(pattern="paradox")
         main(["--pattern", "paradox"])
@@ -49,14 +50,17 @@ def test_main_pattern_option(capsys):
         theme=None,
         max_retries=10,
         trace=False,
-        model="gpt-5.4",
+        model="gpt-5.3-codex",
         reasoning_effort="medium",
-        strict_threshold=9.5,
+        strict_threshold=6.0,
         require_reason_fields=True,
+        scorer_port=19120,
+        scorer_model="gpt-5.4",
     )
 
 
-def test_main_prompts_for_theme_when_not_given(capsys):
+def test_main_prompts_for_theme_when_not_given(capsys, monkeypatch):
+    monkeypatch.setenv("RIDDLE_CONFIG_FILE", "/tmp/nonexistent-riddle-test.toml")
     with patch("riddle.main.RiddleService") as MockService, patch("builtins.input", return_value="食べ物"):
         MockService.return_value.generate_riddle.return_value = _make_result()
         main([])
@@ -66,14 +70,17 @@ def test_main_prompts_for_theme_when_not_given(capsys):
         theme="食べ物",
         max_retries=10,
         trace=False,
-        model="gpt-5.4",
+        model="gpt-5.3-codex",
         reasoning_effort="medium",
-        strict_threshold=9.5,
+        strict_threshold=6.0,
         require_reason_fields=True,
+        scorer_port=19120,
+        scorer_model="gpt-5.4",
     )
 
 
-def test_main_max_retries_option(capsys):
+def test_main_max_retries_option(capsys, monkeypatch):
+    monkeypatch.setenv("RIDDLE_CONFIG_FILE", "/tmp/nonexistent-riddle-test.toml")
     with patch("riddle.main.RiddleService") as MockService, patch("builtins.input", return_value=""):
         MockService.return_value.generate_riddle.return_value = _make_result()
         main(["--max-retries", "15"])
@@ -83,14 +90,17 @@ def test_main_max_retries_option(capsys):
         theme=None,
         max_retries=15,
         trace=False,
-        model="gpt-5.4",
+        model="gpt-5.3-codex",
         reasoning_effort="medium",
-        strict_threshold=9.5,
+        strict_threshold=6.0,
         require_reason_fields=True,
+        scorer_port=19120,
+        scorer_model="gpt-5.4",
     )
 
 
-def test_main_trace_option():
+def test_main_trace_option(monkeypatch):
+    monkeypatch.setenv("RIDDLE_CONFIG_FILE", "/tmp/nonexistent-riddle-test.toml")
     with patch("riddle.main.RiddleService") as MockService, patch("builtins.input", return_value=""):
         MockService.return_value.generate_riddle.return_value = _make_result()
         main(["--trace"])
@@ -100,10 +110,12 @@ def test_main_trace_option():
         theme=None,
         max_retries=10,
         trace=True,
-        model="gpt-5.4",
+        model="gpt-5.3-codex",
         reasoning_effort="medium",
-        strict_threshold=9.5,
+        strict_threshold=6.0,
         require_reason_fields=True,
+        scorer_port=19120,
+        scorer_model="gpt-5.4",
     )
 
 
@@ -134,6 +146,8 @@ def test_main_uses_config_values(capsys, monkeypatch):
         reasoning_effort="high",
         strict_threshold=9.7,
         require_reason_fields=False,
+        scorer_port=19120,
+        scorer_model="gpt-5.4",
     )
 
 

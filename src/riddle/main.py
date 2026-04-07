@@ -39,6 +39,8 @@ def main(args: list[str] | None = None) -> None:
             reasoning_effort=config.reasoning_effort,
             strict_threshold=config.strict_threshold,
             require_reason_fields=config.require_reason_fields,
+            scorer_port=config.scorer_port,
+            scorer_model=config.scorer_model,
         )
     except RuntimeError as e:
         print(f"エラー: {e}", file=sys.stderr)
@@ -51,8 +53,8 @@ def main(args: list[str] | None = None) -> None:
     print(f"試行回数: {result.attempts}回")
     print(
         f"採点: 一意性={result.score.uniqueness} / "
-        f"一現象一逆説={result.score.single_paradox} / "
-        f"観察ベース={result.score.observation_based}"
+        f"一段構造={result.score.structural_soundness} / "
+        f"具体性={result.score.concrete_grounding}"
     )
     print(f"厳格スコア: {result.score.strict_score}")
     print(f"判定: passed={result.score.passed}")

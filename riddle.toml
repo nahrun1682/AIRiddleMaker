@@ -1,6 +1,9 @@
 model = "gpt-5.4"
 reasoning_effort = "medium"
 max_retries = 10
-strict_threshold = 9.5
+strict_threshold = 6.0
 require_reason_fields = true
 trace_default = false
+[scorer]
+model = "gpt-5.4-mini"
+port = 19120

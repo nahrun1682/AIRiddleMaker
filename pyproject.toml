@@ -12,6 +12,11 @@ description = "日本語特化なぞなぞ生成システム"
 requires-python = ">=3.12"
 dependencies = [
     "pydantic>=2.0",
+    "fastapi>=0.115",
+    "fastapi-mcp>=0.4.0",
+    "openai>=1.60",
+    "uvicorn>=0.34",
+    "requests>=2.31",
 ]
 
 [project.scripts]
