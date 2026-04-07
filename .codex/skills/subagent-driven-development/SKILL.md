@@ -1,15 +1,15 @@
 ---
 name: subagent-driven-development
-description: 現在セッションで、独立タスクを含む実装計画を実行するときに使う
+description: Use when executing implementation plans with independent tasks in the current session
 ---
 
 # Subagent-Driven Development
 
-計画を実行する際、タスクごとに新しいサブエージェントをディスパッチし、各タスク後に 2 段階レビューを行う。順序は spec 準拠レビューが先、その後にコード品質レビュー。
+Execute plan by dispatching fresh subagent per task, with two-stage review after each: spec compliance review first, then code quality review.
 
-**コア原則:** タスクごとに fresh subagent + 2 段階レビュー（spec → quality）= 高品質かつ高速反復
+**Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
 
-## 使うべきタイミング
+## When to Use
 
 ```dot
 digraph when_to_use {
@@ -29,13 +29,13 @@ digraph when_to_use {
 }
 ```
 
-**vs. Executing Plans（別セッション）:**
-- 同一セッションで進める（コンテキスト切替なし）
-- タスクごとに fresh subagent（文脈汚染を防止）
-- 各タスク後に 2 段階レビュー: spec 準拠 → code quality
-- 反復が速い（タスク間の human-in-loop 待ちが不要）
+**vs. Executing Plans (parallel session):**
+- Same session (no context switch)
+- Fresh subagent per task (no context pollution)
+- Two-stage review after each task: spec compliance first, then code quality
+- Faster iteration (no human-in-loop between tasks)
 
-## プロセス
+## The Process
 
 ```dot
 digraph process {
@@ -82,13 +82,13 @@ digraph process {
 }
 ```
 
-## プロンプトテンプレート
+## Prompt Templates
 
-- `./implementer-prompt.md` - 実装担当サブエージェントをディスパッチ
-- `./spec-reviewer-prompt.md` - spec 準拠レビュアーサブエージェントをディスパッチ
-- `./code-quality-reviewer-prompt.md` - コード品質レビュアーサブエージェントをディスパッチ
+- `./implementer-prompt.md` - Dispatch implementer subagent
+- `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
+- `./code-quality-reviewer-prompt.md` - Dispatch code quality reviewer subagent
 
-## 実行例ワークフロー
+## Example Workflow
 
 ```
 You: I'm using Subagent-Driven Development to execute this plan.
@@ -164,79 +164,79 @@ Final reviewer: All requirements met, ready to merge
 Done!
 ```
 
-## 利点
+## Advantages
 
-**vs. 手動実行:**
-- サブエージェントが自然に TDD を実施
-- タスクごとに fresh context（混乱を防ぐ）
-- 並列安全（サブエージェント同士が干渉しない）
-- サブエージェントが質問できる（開始前だけでなく実行中も）
+**vs. Manual execution:**
+- Subagents follow TDD naturally
+- Fresh context per task (no confusion)
+- Parallel-safe (subagents don't interfere)
+- Subagent can ask questions (before AND during work)
 
 **vs. Executing Plans:**
-- 同一セッション（引き継ぎ不要）
-- 連続して進捗（待ち時間が少ない）
-- レビューチェックポイントが自動化
+- Same session (no handoff)
+- Continuous progress (no waiting)
+- Review checkpoints automatic
 
-**効率面の利得:**
-- ファイル読み込みのオーバーヘッドなし（コントローラが全文提供）
-- 必要文脈のみをコントローラがキュレート
-- サブエージェントが最初から完全情報を持てる
-- 作業開始前に質問が表面化（開始後ではなく）
+**Efficiency gains:**
+- No file reading overhead (controller provides full text)
+- Controller curates exactly what context is needed
+- Subagent gets complete information upfront
+- Questions surfaced before work begins (not after)
 
-**品質ゲート:**
-- ハンドオフ前の自己レビューで問題を先取り
-- 2 段階レビュー: spec 準拠 → code quality
-- レビューループで修正の有効性を保証
-- spec 準拠で過不足実装を防止
-- code quality で実装品質を担保
+**Quality gates:**
+- Self-review catches issues before handoff
+- Two-stage review: spec compliance, then code quality
+- Review loops ensure fixes actually work
+- Spec compliance prevents over/under-building
+- Code quality ensures implementation is well-built
 
-**コスト:**
-- サブエージェント呼び出し回数が増える（実装 + 2 レビュー / task）
-- コントローラの事前準備が増える（全タスク抽出）
-- レビューループ分の反復が増える
-- ただし問題を早期検出でき、後工程デバッグより安い
+**Cost:**
+- More subagent invocations (implementer + 2 reviewers per task)
+- Controller does more prep work (extracting all tasks upfront)
+- Review loops add iterations
+- But catches issues early (cheaper than debugging later)
 
-## レッドフラグ
+## Red Flags
 
 **Never:**
-- ユーザー明示同意なしに main/master で実装開始
-- レビューを省略（spec 準拠または code quality）
-- 未解決課題を残したまま進行
-- 複数実装サブエージェントを並列実行（競合）
-- サブエージェントに plan ファイルを読ませる（全文を渡す）
-- シーン説明の文脈を省略（タスク位置づけが必要）
-- サブエージェントの質問を無視
-- spec 準拠の「ほぼOK」を受け入れる（指摘あり = 未完）
-- レビューループを省略（指摘あり = 実装修正 + 再レビュー）
-- 実装者の自己レビューで正式レビューを代替する
-- **spec 準拠が ✅ 前に code quality review を始める**（順序違反）
-- どちらかのレビューに未解決事項があるのに次 task へ進む
+- Start implementation on main/master branch without explicit user consent
+- Skip reviews (spec compliance OR code quality)
+- Proceed with unfixed issues
+- Dispatch multiple implementation subagents in parallel (conflicts)
+- Make subagent read plan file (provide full text instead)
+- Skip scene-setting context (subagent needs to understand where task fits)
+- Ignore subagent questions (answer before letting them proceed)
+- Accept "close enough" on spec compliance (spec reviewer found issues = not done)
+- Skip review loops (reviewer found issues = implementer fixes = review again)
+- Let implementer self-review replace actual review (both are needed)
+- **Start code quality review before spec compliance is ✅** (wrong order)
+- Move to next task while either review has open issues
 
 **If subagent asks questions:**
-- 明確かつ十分に回答
-- 必要なら追加文脈を提供
-- 急かして実装に入らせない
+- Answer clearly and completely
+- Provide additional context if needed
+- Don't rush them into implementation
 
 **If reviewer finds issues:**
-- 同じ implementer subagent が修正
-- reviewer が再レビュー
-- 承認まで反復
-- 再レビューを飛ばさない
+- Implementer (same subagent) fixes them
+- Reviewer reviews again
+- Repeat until approved
+- Don't skip the re-review
 
 **If subagent fails task:**
-- 修正専用サブエージェントを具体指示で再投入
-- 手動で直し始めない（文脈汚染）
+- Dispatch fix subagent with specific instructions
+- Don't try to fix manually (context pollution)
 
-## 連携
+## Integration
 
 **Required workflow skills:**
-- **superpowers:using-git-worktrees** - REQUIRED: 開始前に隔離 workspace を準備
-- **superpowers:writing-plans** - 本スキルが実行する plan を作成
-- **superpowers:requesting-code-review** - reviewer subagent 用のレビュー雛形
-- **superpowers:finishing-a-development-branch** - 全タスク完了後の開発完了処理
+- **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
+- **superpowers:writing-plans** - Creates the plan this skill executes
+- **superpowers:requesting-code-review** - Code review template for reviewer subagents
+- **superpowers:finishing-a-development-branch** - Complete development after all tasks
 
 **Subagents should use:**
-- **superpowers:test-driven-development** - 各タスクで TDD を実施
+- **superpowers:test-driven-development** - Subagents follow TDD for each task
 
 **Alternative workflow:**
-- **superpowers:executing-plans** - 同一セッションではなく別セッション実行時に使用
+- **superpowers:executing-plans** - Use for parallel session instead of same-session execution

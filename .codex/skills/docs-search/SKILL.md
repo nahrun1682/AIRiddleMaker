@@ -1,82 +1,82 @@
 ---
 name: docs-search
-description: 自動生成されたコードベース文書（関数シグネチャ、API仕様、クラス定義、コメント）を検索するときに使う。ユーザーが「docs を検索して」「ドキュメントを探して」「関数を確認して」「API を確認して」と依頼した場合や、実装前に正しいシグネチャとパターンを検証する場合に適用。
+description: Search auto-generated codebase documentation for function signatures, API docs, class definitions, and code comments. Use when the user asks to "search docs", "find documentation", "look up a function", "check the API", or before implementing changes to verify correct signatures and patterns.
 ---
 
-# AI Maestro ドキュメント検索
+# AI Maestro Documentation Search
 
-関数シグネチャ、クラス定義、API ドキュメント、コードコメントのために、コードベースの自動生成ドキュメントを検索する。コードを書く前に正しいパターンを検証する。[AI Maestro](https://github.com/23blocks-OS/ai-maestro) スイートの一部。
+Search your codebase's auto-generated documentation for function signatures, class definitions, API docs, and code comments. Verify correct patterns before writing code. Part of the [AI Maestro](https://github.com/23blocks-OS/ai-maestro) suite.
 
-## 前提条件
+## Prerequisites
 
-ドキュメントがインデックス済みの [AI Maestro](https://github.com/23blocks-OS/ai-maestro) がローカルで動作している必要がある。
+Requires [AI Maestro](https://github.com/23blocks-OS/ai-maestro) running locally with documentation indexed.
 
 ```bash
-# ドキュメントツールをインストール
+# Install doc tools
 git clone https://github.com/23blocks-OS/ai-maestro-plugins.git
 cd ai-maestro-plugins && ./install-doc-tools.sh
 ```
 
-## コア挙動
+## Core Behavior
 
-コード変更を実装する前に、必ず先に docs を検索する:
+Before implementing any code changes, search docs first:
 
 ```
-指示を受ける -> docs 検索 -> その後に実装
+Receive instruction -> Search docs -> Then implement
 ```
 
-## コマンド
+## Commands
 
 ### Search
 | Command | Description |
 |---------|-------------|
-| `docs-search.sh <query>` | セマンティックなドキュメント検索 |
-| `docs-search.sh --keyword <term>` | 正確なキーワード一致 |
-| `docs-find-by-type.sh <type>` | タイプ別検索（function, class, module） |
-| `docs-get.sh <doc-id>` | ドキュメント全文を取得 |
+| `docs-search.sh <query>` | Semantic documentation search |
+| `docs-search.sh --keyword <term>` | Exact keyword matching |
+| `docs-find-by-type.sh <type>` | Find by type (function, class, module) |
+| `docs-get.sh <doc-id>` | Get full document content |
 
 ### Index
 | Command | Description |
 |---------|-------------|
-| `docs-index.sh [path]` | プロジェクト全体をフルインデックス |
-| `docs-index-delta.sh [path]` | 差分インデックス（新規/変更ファイルのみ） |
-| `docs-list.sh` | インデックス済みドキュメント一覧 |
-| `docs-stats.sh` | インデックス統計 |
+| `docs-index.sh [path]` | Full index from project |
+| `docs-index-delta.sh [path]` | Delta index (new/modified files only) |
+| `docs-list.sh` | List all indexed documents |
+| `docs-stats.sh` | Index statistics |
 
-## ドキュメントタイプ
+## Document Types
 
 | Type | Sources |
 |------|---------|
 | `function` | JSDoc, RDoc, docstrings |
-| `class` | クラスレベルコメント |
-| `module` | モジュール/名前空間コメント |
-| `interface` | TypeScript interface |
-| `component` | React/Vue コンポーネントコメント |
-| `readme` | README ファイル |
-| `guide` | docs/ フォルダの内容 |
+| `class` | Class-level comments |
+| `module` | Module/namespace comments |
+| `interface` | TypeScript interfaces |
+| `component` | React/Vue component comments |
+| `readme` | README files |
+| `guide` | docs/ folder content |
 
-## 利用例
+## Usage Examples
 
 ```bash
-# セマンティック検索
+# Semantic search
 docs-search.sh "authentication flow"
 
-# 特定識別子をキーワード検索
+# Keyword search for specific identifier
 docs-search.sh --keyword "UserController"
 
-# クラス文書を全件検索
+# Find all class documentation
 docs-find-by-type.sh class
 
-# ドキュメント詳細を全文取得
+# Get full document details
 docs-get.sh doc-abc123
 
-# 初回インデックス
+# Index your codebase (first time)
 docs-index.sh /path/to/project
 
-# 変更後に差分更新
+# Update index after changes
 docs-index-delta.sh
 ```
 
-## AI Maestro 全体像
+## Full AI Maestro Experience
 
-このスキルは [AI Maestro](https://github.com/23blocks-OS/ai-maestro) プラットフォームの一部で、AI エージェントオーケストレーション向けに **6 つのスキル**（messaging, memory, docs, graph, planning, agent management）を提供する。
+This skill is part of the [AI Maestro](https://github.com/23blocks-OS/ai-maestro) platform, which provides **6 skills** for AI agent orchestration: messaging, memory, docs, graph, planning, and agent management.

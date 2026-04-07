@@ -1,83 +1,84 @@
 ---
 name: executing-plans
-description: レビュー用チェックポイントを挟みつつ、別セッションで実行する実装計画があるときに使う
+description: Use when you have a written implementation plan to execute in a separate session with review checkpoints
 ---
 
-# 計画の実行
+# Executing Plans
 
-## 概要
+## Overview
 
-計画を読み込み、批判的にレビューし、タスクをバッチ単位で実行し、バッチ間でレビュー報告する。
+Load plan, review critically, execute tasks in batches, report for review between batches.
 
-**中核原則:** アーキテクトレビュー用チェックポイント付きのバッチ実行。
+**Core principle:** Batch execution with checkpoints for architect review.
 
-**開始時に宣言:** "I'm using the executing-plans skill to implement this plan."
+**Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
-## プロセス
+## The Process
 
-### Step 1: 計画の読み込みとレビュー
-1. 計画ファイルを読む
-2. 批判的にレビューし、疑問点や懸念点を洗い出す
-3. 懸念がある場合: 開始前に人間パートナーへ共有
-4. 懸念がない場合: TodoWrite を作成して進行
+### Step 1: Load and Review Plan
+1. Read plan file
+2. Review critically - identify any questions or concerns about the plan
+3. If concerns: Raise them with your human partner before starting
+4. If no concerns: Create TodoWrite and proceed
 
-### Step 2: バッチ実行
-**デフォルト: 最初の3タスク**
+### Step 2: Execute Batch
+**Default: First 3 tasks**
 
-各タスクについて:
-1. `in_progress` にする
-2. 計画の手順を正確に実行する
-3. 指定された検証を行う
-4. `completed` にする
+For each task:
+1. Mark as in_progress
+2. Follow each step exactly (plan has bite-sized steps)
+3. Run verifications as specified
+4. Mark as completed
 
-### Step 3: 報告
-バッチ完了時:
-- 実装内容を示す
-- 検証出力を示す
-- "Ready for feedback." と伝える
+### Step 3: Report
+When batch complete:
+- Show what was implemented
+- Show verification output
+- Say: "Ready for feedback."
 
-### Step 4: 継続
-フィードバックに応じて:
-- 必要なら修正を反映
-- 次バッチを実行
-- 完了まで繰り返す
+### Step 4: Continue
+Based on feedback:
+- Apply changes if needed
+- Execute next batch
+- Repeat until complete
 
-### Step 5: 開発完了処理
-全タスク完了・検証後:
-- "I'm using the finishing-a-development-branch skill to complete this work." と宣言
-- **REQUIRED SUB-SKILL:** superpowers:finishing-a-development-branch
-- その指示に従ってテスト検証、選択肢提示、実行
+### Step 5: Complete Development
 
-## 停止して確認すべき条件
+After all tasks complete and verified:
+- Announce: "I'm using the finishing-a-development-branch skill to complete this work."
+- **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
+- Follow that skill to verify tests, present options, execute choice
 
-**以下では即停止:**
-- バッチ途中でブロッカー発生（依存不足、テスト失敗、指示不明）
-- 計画に重大欠落があり開始不能
-- 指示理解不能
-- 検証が繰り返し失敗
+## When to Stop and Ask for Help
 
-**推測で進めず、明確化を依頼する。**
+**STOP executing immediately when:**
+- Hit a blocker mid-batch (missing dependency, test fails, instruction unclear)
+- Plan has critical gaps preventing starting
+- You don't understand an instruction
+- Verification fails repeatedly
 
-## 前段へ戻る条件
+**Ask for clarification rather than guessing.**
 
-**Step 1 へ戻る:**
-- パートナーが計画を更新した
-- 根本アプローチの再検討が必要
+## When to Revisit Earlier Steps
 
-**ブロッカーを強行突破しない。**
+**Return to Review (Step 1) when:**
+- Partner updates the plan based on your feedback
+- Fundamental approach needs rethinking
 
-## 覚えること
-- 先に批判的レビュー
-- 手順厳守
-- 検証省略禁止
-- 計画指定のスキル参照
-- バッチ間は報告して待機
-- 詰まったら停止して確認
-- 明示同意なしで main/master で実装開始しない
+**Don't force through blockers** - stop and ask.
 
-## 連携
+## Remember
+- Review plan critically first
+- Follow plan steps exactly
+- Don't skip verifications
+- Reference skills when plan says to
+- Between batches: just report and wait
+- Stop when blocked, don't guess
+- Never start implementation on main/master branch without explicit user consent
 
-**必須ワークフロースキル:**
-- **superpowers:using-git-worktrees** - 開始前に分離ワークスペース作成
-- **superpowers:writing-plans** - 本スキルが実行する計画を作成
-- **superpowers:finishing-a-development-branch** - 全タスク完了後の終了処理
+## Integration
+
+**Required workflow skills:**
+- **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
+- **superpowers:writing-plans** - Creates the plan this skill executes
+- **superpowers:finishing-a-development-branch** - Complete development after all tasks

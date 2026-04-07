@@ -1,27 +1,27 @@
 ---
 name: using-superpowers
-description: あらゆる会話開始時に使う。スキルの探し方・使い方を定義し、確認質問を含むあらゆる応答前に Skill ツール呼び出しを要求する
+description: Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions
 ---
 
 <EXTREMELY-IMPORTANT>
-実施しようとしている作業にスキルが当てはまる可能性が 1% でもあるなら、必ずスキルを呼び出すこと。
+If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
 
-タスクに適用可能なスキルがあるなら、選択の余地はない。必ず使うこと。
+IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
 
-これは交渉不可。任意ではない。理屈をつけて回避してはならない。
+This is not negotiable. This is not optional. You cannot rationalize your way out of this.
 </EXTREMELY-IMPORTANT>
 
-## スキルへのアクセス方法
+## How to Access Skills
 
-**Claude Code の場合:** `Skill` ツールを使う。スキルを呼び出すと内容が読み込まれて提示されるので、その指示に直接従う。スキルファイルに Read ツールは使わない。
+**In Claude Code:** Use the `Skill` tool. When you invoke a skill, its content is loaded and presented to you—follow it directly. Never use the Read tool on skill files.
 
-**その他環境の場合:** スキル読み込み方法は各プラットフォームのドキュメントを確認する。
+**In other environments:** Check your platform's documentation for how skills are loaded.
 
-# スキルの使い方
+# Using Skills
 
-## ルール
+## The Rule
 
-**関連または要求されたスキルは、あらゆる応答・行動より前に呼び出す。** 適用可能性が 1% でもあるなら、確認のために呼び出す。呼び出した結果「今回は不適」と分かった場合は、使わなくてよい。
+**Invoke relevant or requested skills BEFORE any response or action.** Even a 1% chance a skill might apply means that you should invoke the skill to check. If an invoked skill turns out to be wrong for the situation, you don't need to use it.
 
 ```dot
 digraph skill_flow {
@@ -45,43 +45,43 @@ digraph skill_flow {
 }
 ```
 
-## 危険信号
+## Red Flags
 
-次の思考が出たら停止すること。合理化が始まっている。
+These thoughts mean STOP—you're rationalizing:
 
-| 思考 | 現実 |
+| Thought | Reality |
 |---------|---------|
-| 「これは単純な質問だ」 | 質問もタスク。まずスキル確認。 |
-| 「まず文脈を追加で集めたい」 | スキル確認は確認質問より先。 |
-| 「まずコードベースを見てから」 | どう探索するかはスキルが定義する。先に確認。 |
-| 「git/ファイルだけ先に軽く見よう」 | ファイルだけでは会話文脈が欠ける。先に確認。 |
-| 「先に情報収集だけしておく」 | 収集方法もスキルが定義する。 |
-| 「これは正式なスキル不要」 | スキルが存在するなら使う。 |
-| 「このスキルは覚えている」 | スキルは更新される。現行版を読む。 |
-| 「これはタスク扱いじゃない」 | 行動はタスク。まず確認。 |
-| 「このスキルは大げさ」 | 単純な作業ほど複雑化しやすい。使う。 |
-| 「この1つだけ先にやる」 | 何をするにも前に確認。 |
-| 「これは生産的に感じる」 | 無秩序な行動は時間を浪費する。スキルが防ぐ。 |
-| 「意味は分かっている」 | 概念理解 ≠ スキル適用。呼び出すこと。 |
+| "This is just a simple question" | Questions are tasks. Check for skills. |
+| "I need more context first" | Skill check comes BEFORE clarifying questions. |
+| "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
+| "I can check git/files quickly" | Files lack conversation context. Check for skills. |
+| "Let me gather information first" | Skills tell you HOW to gather information. |
+| "This doesn't need a formal skill" | If a skill exists, use it. |
+| "I remember this skill" | Skills evolve. Read current version. |
+| "This doesn't count as a task" | Action = task. Check for skills. |
+| "The skill is overkill" | Simple things become complex. Use it. |
+| "I'll just do this one thing first" | Check BEFORE doing anything. |
+| "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
+| "I know what that means" | Knowing the concept ≠ using the skill. Invoke it. |
 
-## スキル優先順位
+## Skill Priority
 
-複数スキルが該当する場合は次の順番で使う:
+When multiple skills could apply, use this order:
 
-1. **プロセス系スキルを先に**（brainstorming, debugging） - タスクへの向き合い方（HOW）を決める
-2. **実装系スキルを次に**（frontend-design, mcp-builder） - 実行手順を導く
+1. **Process skills first** (brainstorming, debugging) - these determine HOW to approach the task
+2. **Implementation skills second** (frontend-design, mcp-builder) - these guide execution
 
-「X を作る」→ まず brainstorming、その後に実装系スキル。
-「このバグを直す」→ まず debugging、その後にドメイン固有スキル。
+"Let's build X" → brainstorming first, then implementation skills.
+"Fix this bug" → debugging first, then domain-specific skills.
 
-## スキル種別
+## Skill Types
 
-**厳格型**（TDD, debugging）: 厳密に従う。規律を自己流に崩さない。
+**Rigid** (TDD, debugging): Follow exactly. Don't adapt away discipline.
 
-**柔軟型**（patterns）: 原則を文脈に合わせて適用する。
+**Flexible** (patterns): Adapt principles to context.
 
-どちらかは各スキル本文が示す。
+The skill itself tells you which.
 
-## ユーザー指示
+## User Instructions
 
-ユーザー指示は WHAT（何を）であり HOW（どうやって）ではない。`Add X` や `Fix Y` は、ワークフロー省略の許可ではない。
+Instructions say WHAT, not HOW. "Add X" or "Fix Y" doesn't mean skip workflows.

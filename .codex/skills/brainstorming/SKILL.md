@@ -1,54 +1,54 @@
 ---
 name: brainstorming
-description: 機能作成・コンポーネント構築・機能追加・挙動変更など、あらゆる創造的作業の前に必ず使う。実装前にユーザー意図・要件・設計を掘り下げる。
+description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
 ---
 
-# アイデアを設計へ落とし込むブレインストーミング
+# Brainstorming Ideas Into Designs
 
-## 概要
+## Overview
 
-自然で協調的な対話を通じて、アイデアを完成度の高い設計・仕様へ変換する。
+Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
-まず現在のプロジェクト文脈を理解し、その後は質問を1回に1つずつ行ってアイデアを具体化する。何を作るか把握できたら、設計を小さなセクション（200〜300語）で提示し、各セクション後に方向性が正しいか確認する。
+Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design in small sections (200-300 words), checking after each section whether it looks right so far.
 
-## プロセス
+## The Process
 
-**アイデア理解:**
-- 最初に現在のプロジェクト状態を確認する（ファイル、ドキュメント、最近のコミット）
-- アイデアを磨く質問を1回に1つずつ行う
-- 可能なら選択式質問を優先し、必要なら自由記述質問を使う
-- 1メッセージにつき質問は1つだけ。深掘りが必要なら複数質問へ分解する
-- 理解の焦点: 目的、制約、成功基準
+**Understanding the idea:**
+- Check out the current project state first (files, docs, recent commits)
+- Ask questions one at a time to refine the idea
+- Prefer multiple choice questions when possible, but open-ended is fine too
+- Only one question per message - if a topic needs more exploration, break it into multiple questions
+- Focus on understanding: purpose, constraints, success criteria
 
-**アプローチ探索:**
-- トレードオフ付きで2〜3案を提案する
-- 推奨案と理由を会話的に提示する
-- 推奨案を先に示し、なぜ推奨するか説明する
+**Exploring approaches:**
+- Propose 2-3 different approaches with trade-offs
+- Present options conversationally with your recommendation and reasoning
+- Lead with your recommended option and explain why
 
-**設計提示:**
-- 何を作るか理解できたら設計を提示する
-- 200〜300語のセクションに分割する
-- 各セクション後に「ここまで正しいか」を確認する
-- 扱う範囲: アーキテクチャ、コンポーネント、データフロー、エラーハンドリング、テスト
-- 不整合があれば戻って明確化する
+**Presenting the design:**
+- Once you believe you understand what you're building, present the design
+- Break it into sections of 200-300 words
+- Ask after each section whether it looks right so far
+- Cover: architecture, components, data flow, error handling, testing
+- Be ready to go back and clarify if something doesn't make sense
 
-## 設計後
+## After the Design
 
-**ドキュメント化:**
-- 検証済み設計を `docs/plans/YYYY-MM-DD-<topic>-design.md` に保存
-- 利用可能なら elements-of-style:writing-clearly-and-concisely を使う
-- 設計ドキュメントを git にコミット
+**Documentation:**
+- Write the validated design to `docs/plans/YYYY-MM-DD-<topic>-design.md`
+- Use elements-of-style:writing-clearly-and-concisely skill if available
+- Commit the design document to git
 
-**実装（継続する場合）:**
-- 「実装準備に進みますか？」と確認
-- superpowers:using-git-worktrees で分離ワークスペース作成
-- superpowers:writing-plans で詳細実装計画作成
+**Implementation (if continuing):**
+- Ask: "Ready to set up for implementation?"
+- Use superpowers:using-git-worktrees to create isolated workspace
+- Use superpowers:writing-plans to create detailed implementation plan
 
-## 主要原則
+## Key Principles
 
-- **質問は1回に1つ** - 複数質問で相手を圧倒しない
-- **選択式を優先** - 回答しやすくする
-- **YAGNI を徹底** - 不要機能を設計から除外
-- **代替案を探索** - 1案に決める前に2〜3案出す
-- **段階的検証** - 分割提示して都度確認
-- **柔軟性を保つ** - 不明点は戻って明確化
+- **One question at a time** - Don't overwhelm with multiple questions
+- **Multiple choice preferred** - Easier to answer than open-ended when possible
+- **YAGNI ruthlessly** - Remove unnecessary features from all designs
+- **Explore alternatives** - Always propose 2-3 approaches before settling
+- **Incremental validation** - Present design in sections, validate each
+- **Be flexible** - Go back and clarify when something doesn't make sense

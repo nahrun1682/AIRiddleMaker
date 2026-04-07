@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(echo \"$STDIN_JSON\" | jq -r '.tool_input.file_path // \"\"'); case \"$FILE\" in *.py) CONTENT=$(echo \"$STDIN_JSON\" | jq -r '.tool_input.content // \"\"'); echo \"$CONTENT\" | grep -q 'print(' && echo 'Warning: print() statements should be replaced with logging' >&2 && exit 2;; esac"
+            "command": "STDIN_DATA=$(cat); FILE=$(printf '%s' \"$STDIN_DATA\" | jq -r '.tool_input.file_path // \"\"'); case \"$FILE\" in *.py) CONTENT=$(printf '%s' \"$STDIN_DATA\" | jq -r '.tool_input.content // \"\"'); printf '%s' \"$CONTENT\" | grep -q 'print(' && echo 'Warning: print() statements should be replaced with logging' >&2 && exit 2;; esac"
           }
         ]
       },
@@ -53,7 +53,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(echo \"$STDIN_JSON\" | jq -r '.tool_input.file_path // \"\"'); case \"$FILE\" in pyproject.toml) echo 'Checking for vulnerable dependencies...'; if command -v uv >/dev/null 2>&1; then uvx pip-audit; elif command -v safety >/dev/null 2>&1; then safety check; elif command -v pip-audit >/dev/null 2>&1; then pip-audit; else echo 'No security audit tool found. Install uv or safety'; fi;; esac",
+            "command": "STDIN_DATA=$(cat); FILE=$(printf '%s' \"$STDIN_DATA\" | jq -r '.tool_input.file_path // \"\"'); case \"$FILE\" in pyproject.toml) echo 'Checking for vulnerable dependencies...'; if command -v uv >/dev/null 2>&1; then uvx pip-audit; elif command -v safety >/dev/null 2>&1; then safety check; elif command -v pip-audit >/dev/null 2>&1; then pip-audit; else echo 'No security audit tool found. Install uv or safety'; fi;; esac",
             "timeout": 60
           }
         ]
@@ -65,7 +65,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(echo \"$STDIN_JSON\" | jq -r '.tool_input.file_path // \"\"'); case \"$FILE\" in *.py) uv run ruff check --fix --quiet \"$FILE\" 2>/dev/null; uv run ruff format --quiet \"$FILE\" 2>/dev/null;; esac",
+            "command": "STDIN_DATA=$(cat); FILE=$(printf '%s' \"$STDIN_DATA\" | jq -r '.tool_input.file_path // \"\"'); case \"$FILE\" in *.py) uv run ruff check --fix --quiet \"$FILE\" 2>/dev/null; uv run ruff format --quiet \"$FILE\" 2>/dev/null;; esac",
             "timeout": 15
           }
         ]
@@ -75,7 +75,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(echo \"$STDIN_JSON\" | jq -r '.tool_input.file_path // \"\"'); case \"$FILE\" in *.py) RESULT=$(uv run mypy \"$FILE\" 2>&1); STATUS=$?; if [ $STATUS -ne 0 ] && uv run mypy --version >/dev/null 2>&1; then echo \"MyPy type checking issues found: $RESULT\" >&2; exit 2; fi;; esac",
+            "command": "STDIN_DATA=$(cat); FILE=$(printf '%s' \"$STDIN_DATA\" | jq -r '.tool_input.file_path // \"\"'); case \"$FILE\" in *.py) RESULT=$(uv run mypy \"$FILE\" 2>&1); STATUS=$?; if [ $STATUS -ne 0 ] && uv run mypy --version >/dev/null 2>&1; then echo \"MyPy type checking issues found: $RESULT\" >&2; exit 2; fi;; esac",
             "timeout": 30
           }
         ]
@@ -85,7 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(echo \"$STDIN_JSON\" | jq -r '.tool_input.file_path // \"\"'); case \"$FILE\" in *test_*.py|*_test.py) ;; *.py) DIR=$(dirname \"$FILE\"); BASENAME=$(basename \"$FILE\" .py); for TEST_FILE in \"$DIR/test_$BASENAME.py\" \"$DIR/${BASENAME}_test.py\" \"tests/test_$BASENAME.py\"; do if [ -f \"$TEST_FILE\" ]; then echo \"Running tests for $TEST_FILE...\"; uv run pytest \"$TEST_FILE\" -v 2>/dev/null || echo 'No uv-compatible test runner found'; break; fi; done;; esac",
+            "command": "STDIN_DATA=$(cat); FILE=$(printf '%s' \"$STDIN_DATA\" | jq -r '.tool_input.file_path // \"\"'); case \"$FILE\" in *test_*.py|*_test.py) ;; *.py) DIR=$(dirname \"$FILE\"); BASENAME=$(basename \"$FILE\" .py); for TEST_FILE in \"$DIR/test_$BASENAME.py\" \"$DIR/${BASENAME}_test.py\" \"tests/test_$BASENAME.py\"; do if [ -f \"$TEST_FILE\" ]; then echo \"Running tests for $TEST_FILE...\"; uv run pytest \"$TEST_FILE\" -v 2>/dev/null || echo 'No uv-compatible test runner found'; break; fi; done;; esac",
             "timeout": 60
           }
         ]

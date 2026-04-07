@@ -1,30 +1,30 @@
 ---
 name: finishing-a-development-branch
-description: 実装完了・全テスト成功後に、作業の統合方法（マージ/PR/保持/破棄）を選び、完了まで進めるときに使う
+description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
 ---
 
-# 開発ブランチを完了させる
+# Finishing a Development Branch
 
-## 概要
+## Overview
 
-明確な選択肢を提示し、選ばれたワークフローを実行して開発作業を完了させる。
+Guide completion of development work by presenting clear options and handling chosen workflow.
 
-**コア原則:** テスト検証 → 選択肢提示 → 選択実行 → 後片付け。
+**Core principle:** Verify tests → Present options → Execute choice → Clean up.
 
-**開始時に宣言:** "I'm using the finishing-a-development-branch skill to complete this work."
+**Announce at start:** "I'm using the finishing-a-development-branch skill to complete this work."
 
-## プロセス
+## The Process
 
-### Step 1: テストを検証する
+### Step 1: Verify Tests
 
-**選択肢を提示する前に、テスト成功を確認する:**
+**Before presenting options, verify tests pass:**
 
 ```bash
-# プロジェクトのテストスイートを実行
+# Run project's test suite
 npm test / cargo test / uv run pytest / go test ./...
 ```
 
-**テスト失敗時:**
+**If tests fail:**
 ```
 Tests failing (<N> failures). Must fix before completing:
 
@@ -33,22 +33,22 @@ Tests failing (<N> failures). Must fix before completing:
 Cannot proceed with merge/PR until tests pass.
 ```
 
-ここで停止。Step 2 へ進まない。
+Stop. Don't proceed to Step 2.
 
-**テスト成功時:** Step 2 へ進む。
+**If tests pass:** Continue to Step 2.
 
-### Step 2: ベースブランチを特定する
+### Step 2: Determine Base Branch
 
 ```bash
-# よくあるベースブランチを試す
+# Try common base branches
 git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
 ```
 
-または確認する: "This branch split from main - is that correct?"
+Or ask: "This branch split from main - is that correct?"
 
-### Step 3: 選択肢を提示する
+### Step 3: Present Options
 
-次の 4 つを正確に提示する:
+Present exactly these 4 options:
 
 ```
 Implementation complete. What would you like to do?
@@ -61,38 +61,38 @@ Implementation complete. What would you like to do?
 Which option?
 ```
 
-**説明を追加しない** - 簡潔に提示する。
+**Don't add explanation** - keep options concise.
 
-### Step 4: 選択を実行する
+### Step 4: Execute Choice
 
-#### Option 1: ローカルでマージ
+#### Option 1: Merge Locally
 
 ```bash
-# ベースブランチへ切り替え
+# Switch to base branch
 git checkout <base-branch>
 
-# 最新を取得
+# Pull latest
 git pull
 
-# フィーチャーブランチをマージ
+# Merge feature branch
 git merge <feature-branch>
 
-# マージ結果でテスト検証
+# Verify tests on merged result
 <test command>
 
-# テスト成功なら
+# If tests pass
 git branch -d <feature-branch>
 ```
 
-その後: worktree をクリーンアップ（Step 5）
+Then: Cleanup worktree (Step 5)
 
-#### Option 2: Push して PR 作成
+#### Option 2: Push and Create PR
 
 ```bash
-# ブランチを push
+# Push branch
 git push -u origin <feature-branch>
 
-# PR を作成
+# Create PR
 gh pr create --title "<title>" --body "$(cat <<'EOF'
 ## Summary
 <2-3 bullets of what changed>
@@ -103,17 +103,17 @@ EOF
 )"
 ```
 
-その後: worktree をクリーンアップ（Step 5）
+Then: Cleanup worktree (Step 5)
 
-#### Option 3: 現状維持
+#### Option 3: Keep As-Is
 
-報告: "Keeping branch <name>. Worktree preserved at <path>."
+Report: "Keeping branch <name>. Worktree preserved at <path>."
 
-**worktree はクリーンアップしない。**
+**Don't cleanup worktree.**
 
-#### Option 4: 破棄
+#### Option 4: Discard
 
-**必ず先に確認:**
+**Confirm first:**
 ```
 This will permanently delete:
 - Branch <name>
@@ -123,33 +123,33 @@ This will permanently delete:
 Type 'discard' to confirm.
 ```
 
-厳密一致の確認入力を待つ。
+Wait for exact confirmation.
 
-確認後:
+If confirmed:
 ```bash
 git checkout <base-branch>
 git branch -D <feature-branch>
 ```
 
-その後: worktree をクリーンアップ（Step 5）
+Then: Cleanup worktree (Step 5)
 
-### Step 5: worktree をクリーンアップ
+### Step 5: Cleanup Worktree
 
-**Option 1, 2, 4 の場合:**
+**For Options 1, 2, 4:**
 
-worktree か確認:
+Check if in worktree:
 ```bash
 git worktree list | grep $(git branch --show-current)
 ```
 
-該当するなら:
+If yes:
 ```bash
 git worktree remove <worktree-path>
 ```
 
-**Option 3:** worktree を保持。
+**For Option 3:** Keep worktree.
 
-## クイックリファレンス
+## Quick Reference
 
 | Option | Merge | Push | Keep Worktree | Cleanup Branch |
 |--------|-------|------|---------------|----------------|
@@ -158,43 +158,43 @@ git worktree remove <worktree-path>
 | 3. Keep as-is | - | - | ✓ | - |
 | 4. Discard | - | - | - | ✓ (force) |
 
-## よくあるミス
+## Common Mistakes
 
-**テスト検証を飛ばす**
-- **問題:** 壊れたコードをマージ/失敗する PR を作る
-- **対処:** 選択肢提示前に必ずテストを検証
+**Skipping test verification**
+- **Problem:** Merge broken code, create failing PR
+- **Fix:** Always verify tests before offering options
 
-**自由記述の質問**
-- **問題:** "What should I do next?" は曖昧
-- **対処:** 構造化された 4 選択肢を正確に提示
+**Open-ended questions**
+- **Problem:** "What should I do next?" → ambiguous
+- **Fix:** Present exactly 4 structured options
 
-**自動で worktree を消す**
-- **問題:** 後で必要な worktree を消す（Option 2, 3）
-- **対処:** クリーンアップは Option 1 と 4 のみ
+**Automatic worktree cleanup**
+- **Problem:** Remove worktree when might need it (Option 2, 3)
+- **Fix:** Only cleanup for Options 1 and 4
 
-**破棄の確認なし**
-- **問題:** 誤って作業を削除
-- **対処:** 必ず "discard" の入力確認を要求
+**No confirmation for discard**
+- **Problem:** Accidentally delete work
+- **Fix:** Require typed "discard" confirmation
 
-## レッドフラグ
+## Red Flags
 
-**絶対にしない:**
-- テスト失敗のまま進める
-- マージ結果のテスト検証なしにマージ
-- 確認なしで作業削除
-- 明示依頼なしの force-push
+**Never:**
+- Proceed with failing tests
+- Merge without verifying tests on result
+- Delete work without confirmation
+- Force-push without explicit request
 
-**必ず行う:**
-- 選択肢提示前のテスト検証
-- 正確に 4 つの選択肢提示
-- Option 4 の typed confirmation
-- Option 1 と 4 のみ worktree クリーンアップ
+**Always:**
+- Verify tests before offering options
+- Present exactly 4 options
+- Get typed confirmation for Option 4
+- Clean up worktree for Options 1 & 4 only
 
-## 連携
+## Integration
 
-**呼び出し元:**
-- **subagent-driven-development**（Step 7）- 全タスク完了後
-- **executing-plans**（Step 5）- 全バッチ完了後
+**Called by:**
+- **subagent-driven-development** (Step 7) - After all tasks complete
+- **executing-plans** (Step 5) - After all batches complete
 
-**併用先:**
-- **using-git-worktrees** - そのスキルで作成した worktree を片付ける
+**Pairs with:**
+- **using-git-worktrees** - Cleans up worktree created by that skill

@@ -1,43 +1,43 @@
 ---
 name: using-git-worktrees
-description: 現在ワークスペースから分離して機能開発を始めるとき、または実装計画実行前に使う。適切なディレクトリ選択と安全確認を行い、隔離 git worktree を作成する。
+description: Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification
 ---
 
-# Git Worktree の使い方
+# Using Git Worktrees
 
-## 概要
+## Overview
 
-Git worktree は同一リポジトリを共有しつつ、切り替えなしで複数ブランチを同時に作業できる隔離ワークスペースを作る。
+Git worktrees create isolated workspaces sharing the same repository, allowing work on multiple branches simultaneously without switching.
 
-**コア原則:** 体系的なディレクトリ選択 + 安全確認 = 信頼できる隔離。
+**Core principle:** Systematic directory selection + safety verification = reliable isolation.
 
-**開始時に宣言:** "I'm using the using-git-worktrees skill to set up an isolated workspace."
+**Announce at start:** "I'm using the using-git-worktrees skill to set up an isolated workspace."
 
-## ディレクトリ選択手順
+## Directory Selection Process
 
-次の優先順で判断する:
+Follow this priority order:
 
-### 1. 既存ディレクトリを確認
+### 1. Check Existing Directories
 
 ```bash
-# 優先順で確認
-ls -d .worktrees 2>/dev/null     # 優先（hidden）
-ls -d worktrees 2>/dev/null      # 代替
+# Check in priority order
+ls -d .worktrees 2>/dev/null     # Preferred (hidden)
+ls -d worktrees 2>/dev/null      # Alternative
 ```
 
-**見つかった場合:** そのディレクトリを使う。両方ある場合は `.worktrees` を優先。
+**If found:** Use that directory. If both exist, `.worktrees` wins.
 
-### 2. CLAUDE.md を確認
+### 2. Check CLAUDE.md
 
 ```bash
 grep -i "worktree.*director" CLAUDE.md 2>/dev/null
 ```
 
-**指定がある場合:** 質問せず、その指定を使う。
+**If preference specified:** Use it without asking.
 
-### 3. ユーザーに確認
+### 3. Ask User
 
-ディレクトリが存在せず、CLAUDE.md 指定もない場合:
+If no directory exists and no CLAUDE.md preference:
 
 ```
 No worktree directory found. Where should I create worktrees?
@@ -48,42 +48,42 @@ No worktree directory found. Where should I create worktrees?
 Which would you prefer?
 ```
 
-## 安全確認
+## Safety Verification
 
-### プロジェクトローカル（.worktrees / worktrees）の場合
+### For Project-Local Directories (.worktrees or worktrees)
 
-**作成前に、必ず ignore 済みか検証する:**
+**MUST verify directory is ignored before creating worktree:**
 
 ```bash
-# ignore 判定（local/global/system の gitignore を反映）
+# Check if directory is ignored (respects local, global, and system gitignore)
 git check-ignore -q .worktrees 2>/dev/null || git check-ignore -q worktrees 2>/dev/null
 ```
 
-**ignore されていない場合:**
+**If NOT ignored:**
 
-Jesse のルール "Fix broken things immediately" に従う:
-1. `.gitignore` に適切な行を追加
-2. その変更をコミット
-3. その後 worktree 作成を続行
+Per Jesse's rule "Fix broken things immediately":
+1. Add appropriate line to .gitignore
+2. Commit the change
+3. Proceed with worktree creation
 
-**重要理由:** worktree 内容の誤コミットを防ぐため。
+**Why critical:** Prevents accidentally committing worktree contents to repository.
 
-### グローバルディレクトリ（~/.config/superpowers/worktrees）の場合
+### For Global Directory (~/.config/superpowers/worktrees)
 
-プロジェクト外なので `.gitignore` 確認は不要。
+No .gitignore verification needed - outside project entirely.
 
-## 作成手順
+## Creation Steps
 
-### 1. プロジェクト名を検出
+### 1. Detect Project Name
 
 ```bash
 project=$(basename "$(git rev-parse --show-toplevel)")
 ```
 
-### 2. Worktree 作成
+### 2. Create Worktree
 
 ```bash
-# フルパス決定
+# Determine full path
 case $LOCATION in
   .worktrees|worktrees)
     path="$LOCATION/$BRANCH_NAME"
@@ -93,14 +93,14 @@ case $LOCATION in
     ;;
 esac
 
-# 新規ブランチで worktree 作成
+# Create worktree with new branch
 git worktree add "$path" -b "$BRANCH_NAME"
 cd "$path"
 ```
 
-### 3. プロジェクトセットアップ実行
+### 3. Run Project Setup
 
-自動判定して適切なセットアップを実行:
+Auto-detect and run appropriate setup:
 
 ```bash
 # Node.js
@@ -116,23 +116,23 @@ if [ -f pyproject.toml ]; then uv sync; fi
 if [ -f go.mod ]; then go mod download; fi
 ```
 
-### 4. クリーンな初期状態を検証
+### 4. Verify Clean Baseline
 
-worktree がクリーンに始まるかテスト実行:
+Run tests to ensure worktree starts clean:
 
 ```bash
-# 例: プロジェクトに合わせたコマンドを使う
+# Examples - use project-appropriate command
 npm test
 cargo test
 uv run pytest
 go test ./...
 ```
 
-**テスト失敗時:** 失敗内容を報告し、続行するか調査するか確認。
+**If tests fail:** Report failures, ask whether to proceed or investigate.
 
-**テスト成功時:** 準備完了を報告。
+**If tests pass:** Report ready.
 
-### 5. 場所を報告
+### 5. Report Location
 
 ```
 Worktree ready at <full-path>
@@ -140,41 +140,41 @@ Tests passing (<N> tests, 0 failures)
 Ready to implement <feature-name>
 ```
 
-## クイックリファレンス
+## Quick Reference
 
 | Situation | Action |
 |-----------|--------|
-| `.worktrees/` が存在 | それを使う（ignore確認） |
-| `worktrees/` が存在 | それを使う（ignore確認） |
-| 両方存在 | `.worktrees/` を使う |
-| どちらもない | CLAUDE.md 確認 → ユーザー確認 |
-| ignore されていない | `.gitignore` 追加 + コミット |
-| 初期テストで失敗 | 失敗報告 + 方針確認 |
-| package.json/Cargo.toml なし | 依存導入をスキップ |
+| `.worktrees/` exists | Use it (verify ignored) |
+| `worktrees/` exists | Use it (verify ignored) |
+| Both exist | Use `.worktrees/` |
+| Neither exists | Check CLAUDE.md → Ask user |
+| Directory not ignored | Add to .gitignore + commit |
+| Tests fail during baseline | Report failures + ask |
+| No package.json/Cargo.toml | Skip dependency install |
 
-## よくあるミス
+## Common Mistakes
 
-### ignore 確認を飛ばす
+### Skipping ignore verification
 
-- **問題:** worktree 内容が追跡され、git status が汚染
-- **対処:** プロジェクトローカル作成前に必ず `git check-ignore`
+- **Problem:** Worktree contents get tracked, pollute git status
+- **Fix:** Always use `git check-ignore` before creating project-local worktree
 
-### ディレクトリ位置を決め打ち
+### Assuming directory location
 
-- **問題:** 一貫性を崩し、プロジェクト規約違反
-- **対処:** 優先順を守る: existing > CLAUDE.md > ask
+- **Problem:** Creates inconsistency, violates project conventions
+- **Fix:** Follow priority: existing > CLAUDE.md > ask
 
-### テスト失敗のまま進む
+### Proceeding with failing tests
 
-- **問題:** 新規不具合と既存不具合の区別がつかない
-- **対処:** 失敗報告し、明示許可を得てから進む
+- **Problem:** Can't distinguish new bugs from pre-existing issues
+- **Fix:** Report failures, get explicit permission to proceed
 
-### セットアップコマンドをハードコード
+### Hardcoding setup commands
 
-- **問題:** 異なるツールチェーンのプロジェクトで壊れる
-- **対処:** プロジェクトファイルから自動判定（package.json など）
+- **Problem:** Breaks on projects using different tools
+- **Fix:** Auto-detect from project files (package.json, etc.)
 
-## 実行例
+## Example Workflow
 
 ```
 You: I'm using the using-git-worktrees skill to set up an isolated workspace.
@@ -190,28 +190,28 @@ Tests passing (47 tests, 0 failures)
 Ready to implement auth feature
 ```
 
-## レッドフラグ
+## Red Flags
 
 **Never:**
-- ignore 確認なしで worktree 作成（project-local）
-- 初期テスト確認を省略
-- テスト失敗のまま無確認で進行
-- 曖昧なときに保存先を決め打ち
-- CLAUDE.md 確認を省略
+- Create worktree without verifying it's ignored (project-local)
+- Skip baseline test verification
+- Proceed with failing tests without asking
+- Assume directory location when ambiguous
+- Skip CLAUDE.md check
 
 **Always:**
-- 優先順を守る: existing > CLAUDE.md > ask
-- project-local では ignore 状態を確認
-- 自動判定でセットアップ実行
-- クリーンなテスト初期状態を確認
+- Follow directory priority: existing > CLAUDE.md > ask
+- Verify directory is ignored for project-local
+- Auto-detect and run project setup
+- Verify clean test baseline
 
-## 連携
+## Integration
 
-**呼び出し元:**
-- **brainstorming**（Phase 4）- 設計承認後に実装へ進む場合は REQUIRED
-- **subagent-driven-development** - タスク実行前に REQUIRED
-- **executing-plans** - タスク実行前に REQUIRED
-- そのほか隔離ワークスペースが必要なスキル
+**Called by:**
+- **brainstorming** (Phase 4) - REQUIRED when design is approved and implementation follows
+- **subagent-driven-development** - REQUIRED before executing any tasks
+- **executing-plans** - REQUIRED before executing any tasks
+- Any skill needing isolated workspace
 
-**併用先:**
-- **finishing-a-development-branch** - 作業完了後の cleanup で REQUIRED
+**Pairs with:**
+- **finishing-a-development-branch** - REQUIRED for cleanup after work complete

@@ -1,93 +1,105 @@
 ---
 name: requesting-code-review
-description: タスク完了時・主要機能実装時・マージ前に、成果物が要件を満たすか検証するために使う
+description: Use when completing tasks, implementing major features, or before merging to verify work meets requirements
 ---
 
-# コードレビュー依頼
+# Requesting Code Review
 
-問題が連鎖する前に見つけるため、superpowers:code-reviewer サブエージェントを起動する。
+Dispatch superpowers:code-reviewer subagent to catch issues before they cascade.
 
-**中核原則:** 早くレビューし、頻繁にレビューする。
+**Core principle:** Review early, review often.
 
-## レビュー依頼のタイミング
+## When to Request Review
 
-**必須:**
-- subagent-driven development の各タスク完了後
-- 主要機能の実装完了後
-- main へマージする前
+**Mandatory:**
+- After each task in subagent-driven development
+- After completing major feature
+- Before merge to main
 
-**任意だが有効:**
-- 行き詰まったとき
-- リファクタ前
-- 複雑なバグ修正後
+**Optional but valuable:**
+- When stuck (fresh perspective)
+- Before refactoring (baseline check)
+- After fixing complex bug
 
-## 依頼方法
+## How to Request
 
-**1. git SHA を取得**
+**1. Get git SHAs:**
 ```bash
 BASE_SHA=$(git rev-parse HEAD~1)  # or origin/main
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
-**2. code-reviewer サブエージェント起動**
+**2. Dispatch code-reviewer subagent:**
 
-Task ツールで superpowers:code-reviewer を使い、`code-reviewer.md` テンプレートを埋める。
+Use Task tool with superpowers:code-reviewer type, fill template at `code-reviewer.md`
 
-**プレースホルダー:**
-- `{WHAT_WAS_IMPLEMENTED}` - 実装内容
-- `{PLAN_OR_REQUIREMENTS}` - 満たすべき要件
-- `{BASE_SHA}` - 開始コミット
-- `{HEAD_SHA}` - 終了コミット
-- `{DESCRIPTION}` - 簡易要約
+**Placeholders:**
+- `{WHAT_WAS_IMPLEMENTED}` - What you just built
+- `{PLAN_OR_REQUIREMENTS}` - What it should do
+- `{BASE_SHA}` - Starting commit
+- `{HEAD_SHA}` - Ending commit
+- `{DESCRIPTION}` - Brief summary
 
-**3. フィードバックに対応**
-- Critical は即修正
-- Important は先へ進む前に修正
-- Minor は後で対応
-- 誤指摘は根拠付きで反論
+**3. Act on feedback:**
+- Fix Critical issues immediately
+- Fix Important issues before proceeding
+- Note Minor issues for later
+- Push back if reviewer is wrong (with reasoning)
 
-## 例
+## Example
 
 ```
-[Task 2: 検証関数追加を完了]
+[Just completed Task 2: Add verification function]
 
-You: 先に進む前にレビュー依頼する。
+You: Let me request code review before proceeding.
 
 BASE_SHA=$(git log --oneline | grep "Task 1" | head -1 | awk '{print $1}')
 HEAD_SHA=$(git rev-parse HEAD)
 
-[superpowers:code-reviewer 起動]
-  WHAT_WAS_IMPLEMENTED: 会話インデックスの検証・修復関数
-  PLAN_OR_REQUIREMENTS: docs/plans/deployment-plan.md の Task 2
+[Dispatch superpowers:code-reviewer subagent]
+  WHAT_WAS_IMPLEMENTED: Verification and repair functions for conversation index
+  PLAN_OR_REQUIREMENTS: Task 2 from docs/plans/deployment-plan.md
   BASE_SHA: a7981ec
   HEAD_SHA: 3df7661
-  DESCRIPTION: verifyIndex() と repairIndex() を追加
+  DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
+
+[Subagent returns]:
+  Strengths: Clean architecture, real tests
+  Issues:
+    Important: Missing progress indicators
+    Minor: Magic number (100) for reporting interval
+  Assessment: Ready to proceed
+
+You: [Fix progress indicators]
+[Continue to Task 3]
 ```
 
-## ワークフロー連携
+## Integration with Workflows
 
 **Subagent-Driven Development:**
-- 各タスク後にレビュー
-- 問題の複利化を防ぐ
+- Review after EACH task
+- Catch issues before they compound
+- Fix before moving to next task
 
 **Executing Plans:**
-- 各バッチ（3タスク）後にレビュー
+- Review after each batch (3 tasks)
+- Get feedback, apply, continue
 
 **Ad-Hoc Development:**
-- マージ前
-- 行き詰まり時
+- Review before merge
+- Review when stuck
 
-## 危険信号
+## Red Flags
 
 **Never:**
-- 「簡単だから」でレビュー省略
-- Critical を無視
-- Important 未修正で進行
-- 妥当な指摘に感情的反論
+- Skip review because "it's simple"
+- Ignore Critical issues
+- Proceed with unfixed Important issues
+- Argue with valid technical feedback
 
-**レビュアーが誤っている場合:**
-- 技術的根拠で反論
-- コード/テストで裏付け
-- 必要なら明確化を依頼
+**If reviewer wrong:**
+- Push back with technical reasoning
+- Show code/tests that prove it works
+- Request clarification
 
-テンプレート: `requesting-code-review/code-reviewer.md`
+See template at: requesting-code-review/code-reviewer.md
