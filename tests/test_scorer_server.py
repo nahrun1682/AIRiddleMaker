@@ -85,3 +85,57 @@ def test_score_operation_id_is_score_riddle():
     schema = get_openapi(title=app.title, version=app.version, routes=app.routes)
     score_op = schema["paths"]["/score"]["post"]
     assert score_op["operationId"] == "score_riddle"
+
+
+@patch("riddle.scorer_server.search_riddle_evidence")
+def test_score_injects_search_evidence_into_prompt(mock_search, client):
+    """検索結果がLLMプロンプトに注入されることを確認."""
+    mock_search.return_value = {
+        "hit_count": 500,
+        "snippets": ["春雨のなぞなぞ — Q:空から降る A:春雨 (https://example.com)"],
+    }
+    with patch("riddle.scorer_server._openai_client") as mock_client:
+        mock_client.chat.completions.create.return_value = _mock_openai_response(
+            PASSING_SCORE
+        )
+        client.post(
+            "/score",
+            json={"question": "空から降るのにすするものは？", "answer": "春雨"},
+        )
+
+    call_args = mock_client.chat.completions.create.call_args
+    user_msg = call_args.kwargs["messages"][1]["content"]
+    assert "検索ヒット数" in user_msg
+    assert "500" in user_msg
+    assert "春雨のなぞなぞ" in user_msg
+
+
+@patch("riddle.scorer_server.search_riddle_evidence")
+def test_score_works_when_search_fails(mock_search, client):
+    """検索が失敗しても採点は続行する."""
+    mock_search.return_value = None
+    with patch("riddle.scorer_server._openai_client") as mock_client:
+        mock_client.chat.completions.create.return_value = _mock_openai_response(
+            PASSING_SCORE
+        )
+        resp = client.post("/score", json={"question": "q", "answer": "a"})
+
+    assert resp.status_code == 200
+    call_args = mock_client.chat.completions.create.call_args
+    user_msg = call_args.kwargs["messages"][1]["content"]
+    assert "検索不可" in user_msg
+
+
+@patch("riddle.scorer_server.search_riddle_evidence")
+def test_score_no_search_hits(mock_search, client):
+    """検索0件の場合もプロンプトに反映."""
+    mock_search.return_value = {"hit_count": 0, "snippets": []}
+    with patch("riddle.scorer_server._openai_client") as mock_client:
+        mock_client.chat.completions.create.return_value = _mock_openai_response(
+            PASSING_SCORE
+        )
+        client.post("/score", json={"question": "q", "answer": "a"})
+
+    call_args = mock_client.chat.completions.create.call_args
+    user_msg = call_args.kwargs["messages"][1]["content"]
+    assert "検索ヒット数: 0" in user_msg

@@ -1,9 +1,12 @@
 """Scorer MCP server — FastAPI + fastapi_mcp で採点ツールを MCP 公開する."""
 
 import json
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
+
+from riddle.brave_search import search_riddle_evidence
 from fastapi_mcp import FastApiMCP
 from openai import OpenAI
 from pydantic import BaseModel, Field
@@ -50,7 +53,35 @@ def create_app(model: str = "gpt-5.4", api_key: str | None = None) -> FastAPI:
     def score_riddle(req: ScoreRequest) -> ScoreResponse:
         """なぞなぞを採点し、スコアと合否を返す。"""
         system_prompt = _load_system_prompt()
-        user_prompt = f"問題文: {req.question}\n答え: {req.answer}"
+
+        # Brave Search で既存なぞなぞを調査
+        brave_key = os.environ.get("BRAVE_API_KEY", "")
+        evidence = search_riddle_evidence(req.answer, api_key=brave_key)
+
+        # ユーザープロンプト組み立て
+        user_parts = [f"問題文: {req.question}", f"答え: {req.answer}"]
+        if evidence is None:
+            user_parts.append(
+                "\n## ウェブ検索結果（検索不可）\n"
+                "検索APIに接続できませんでした。"
+                "オリジナリティはLLMの知識のみで判定してください。"
+            )
+        elif evidence["hit_count"] == 0:
+            user_parts.append(
+                f"\n## ウェブ検索結果\n"
+                f"検索クエリ: 「{req.answer} なぞなぞ」\n"
+                f"検索ヒット数: 0\n"
+                f"類似するなぞなぞはウェブ上に見つかりませんでした。"
+            )
+        else:
+            snippet_text = "\n".join(f"- {s}" for s in evidence["snippets"])
+            user_parts.append(
+                f"\n## ウェブ検索結果\n"
+                f"検索クエリ: 「{req.answer} なぞなぞ」\n"
+                f"検索ヒット数: {evidence['hit_count']}\n\n"
+                f"{snippet_text}"
+            )
+        user_prompt = "\n".join(user_parts)
 
         response = _openai_client.chat.completions.create(
             model=_scorer_model,
