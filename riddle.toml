@@ -1,4 +1,4 @@
-model = "gpt-5.4-mini"
+model = "gpt-5.4"
 reasoning_effort = "medium"
 max_retries = 10
 strict_threshold = 6.0
