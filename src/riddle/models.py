@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 
 class ScoreDetail(BaseModel):
@@ -10,19 +10,12 @@ class ScoreDetail(BaseModel):
     reason: str | None = None
     strict_review: str | None = None
 
-    @model_validator(mode="after")
-    def validate_passed_consistency(self) -> "ScoreDetail":
-        expected_passed = (
+    def expected_pass(self, strict_threshold: float) -> bool:
+        return (
             self.structural_soundness
             and self.concrete_grounding
-            and self.strict_score >= 6.0
+            and self.strict_score >= strict_threshold
         )
-        if self.passed != expected_passed:
-            raise ValueError(
-                "passed must match structural_soundness/concrete_grounding "
-                "and strict_score >= 6.0"
-            )
-        return self
 
 
 class RiddleResult(BaseModel):

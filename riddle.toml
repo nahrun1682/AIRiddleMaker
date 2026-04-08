@@ -1,7 +1,7 @@
-model = "gpt-5.4"
+model = "gpt-5.4-mini"
 reasoning_effort = "medium"
 max_retries = 10
-strict_threshold = 6.0
+strict_threshold = 6.5
 require_reason_fields = true
 trace_default = false
 [scorer]
